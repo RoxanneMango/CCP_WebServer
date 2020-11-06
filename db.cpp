@@ -19,7 +19,7 @@ main(int argc, char ** argv)
 	DatabaseServer		database(id, listenSocket, connectionSocket, bufferSize);
 		
 	const char * loadFile = (argc == 2) ? argv[1] : "database.db";
-	const char * saveFile = (argc == 3) ? argv[2] : "database.db";
+	const char * saveFile = (argc == 3) ? argv[2] : "database_save.db";
 	//
 	printf("load file: %s\n", loadFile);
 	printf("save file: %s\n", saveFile);
@@ -34,7 +34,6 @@ main(int argc, char ** argv)
 		printf("Could not save to file.");
 		return -1;
 	}
-	
 //	std::thread autoSave(saveTimer2, *saveFile);
 	std::thread autoSave(saveTimer, std::ref(database), saveFile);
 	

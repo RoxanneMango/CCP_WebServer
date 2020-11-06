@@ -13,9 +13,10 @@ void
 DatabaseServer::processQuery()
 {
 	// sanitize input from bufferPtr and do stuff with it . . .	
-	printf("Incoming query ->\n\t%s\n", receiveBuffer); fflush(stdout);
+//	printf("Incoming query ->\n\t%s\n", receiveBuffer); fflush(stdout);
 	
 	bufferPtr = receiveBuffer;
+
 	try
 	{
 		int size = 0;
@@ -27,6 +28,7 @@ DatabaseServer::processQuery()
 		}
 		if(!strncmp(bufferPtr-size, "select", size))
 		{
+			//printf("select: %s\n", &select()[0]);
 			sprintf(buffer, "%s", &select()[0]);
 		}
 		else if(!strncmp(bufferPtr-size, "insert", size))
@@ -71,20 +73,21 @@ DatabaseServer::load(const char * path)
 		char c = tolower(fgetc(FP));
 		while( (c == ' ') || (c == '\n') || (c == '\t') )
 		{
-			c = fgetc(FP);
+			c = fgetc(FP); 
 		}
 		while(c != EOF)
 		{
 			memset(command, 0, commandSize);
 			if(!isLetter(c) || (c == ';'))
 			{
-				c = fgetc(FP);
+				c = fgetc(FP); 
 				continue;
 			}
 			for(unsigned int i = 0; isLetter(c) && (c != ';') && (i < commandSize); ++i )
 			{
 				command[i] = tolower(c);
-				c = fgetc(FP);
+				c = fgetc(FP); 
+				
 			}
 			if(!(strcmp(command, "use")))
 			{
@@ -92,14 +95,14 @@ DatabaseServer::load(const char * path)
 				if(!databases.size())
 					throw "Cannot USE non-existent database.";
 				
-				c = fgetc(FP);
+				c = fgetc(FP); 
 				bool isFound = false;
 				for(unsigned int i = 0; i < databases.size(); ++i)
 				{
 					for( unsigned int i = 0; isLetter(c) && (c != ';') && (i < commandSize); ++i )
 					{
 						command[i] = c;
-						c = fgetc(FP);
+						c = fgetc(FP); 
 					}
 					if(!strcmp(&databases[i].name[0], command))
 					{
@@ -119,21 +122,21 @@ DatabaseServer::load(const char * path)
 			else if(!(strcmp(command, "create")))
 			{
 				memset(command, 0, commandSize);
-				c = fgetc(FP);
+				c = fgetc(FP); 
 				for( unsigned int i = 0; isLetter(c) && (i < commandSize); ++i )
 				{
 					//printf("%c", c); fflush(stdout);
 					command[i] = tolower(c);
-					c = fgetc(FP);
+					c = fgetc(FP); 
 				}
 				if(!(strcmp(command, "database")))
 				{
 					memset(command, 0, commandSize);
-					c = fgetc(FP);
+					c = fgetc(FP); 
 					for( unsigned int i = 0; isLetter(c) && (c != ';') && (i < commandSize); ++i )
 					{
 						command[i] = c;
-						c = fgetc(FP);
+						c = fgetc(FP); 
 					}
 					//printf("CREATE DATABASE %s\n", command); fflush(stdout);
 					databases.push_back(SQL_Database(std::string(command)));
@@ -141,12 +144,12 @@ DatabaseServer::load(const char * path)
 				else if(!(strcmp(command, "table")))
 				{
 					memset(command, 0, commandSize);
-					c = fgetc(FP);
+					c = fgetc(FP); 
 					for( unsigned int i = 0; isLetter(c) && (c != ';') && (i < commandSize); ++i )
 					{
-					//	printf("%c", c); fflush(stdout);
+						//printf("%c", c); fflush(stdout);
 						command[i] = c;
-						c = fgetc(FP);
+						c = fgetc(FP); 
 					}
 					if(index < 0)
 					{
@@ -163,30 +166,29 @@ DatabaseServer::load(const char * path)
 						
 						if(!isLetter(c) && !isNumber(c))
 						{
-							c = fgetc(FP);
+							c = fgetc(FP); 
 							continue;
 						}
 						
 						for( unsigned int i = 0; (isLetter(c) || isNumber(c) || (((c == '(') || (c == ')')))) && (i < commandSize); ++i )
 						{
 							command[i] = c;
-							c = fgetc(FP);
+							c = fgetc(FP); 
 						}
 						if(!(even%2))
 						{
 							databases[index].tables[databases[index].tables.size()-1].columns.push_back(Column(std::string(command)));
 						}
-						c = fgetc(FP);
+						c = fgetc(FP); 
 						even += 1;
 					}
-					
 				}
 			}
 
 			else if(!(strcmp(command, "insert")))
 			{
 				memset(command, 0, commandSize);
-				c = fgetc(FP);
+				c = fgetc(FP); 
 				for( unsigned int i = 0; isLetter(c) && (i < commandSize); ++i, c = fgetc(FP) )
 				{
 					command[i] = tolower(c);
@@ -195,13 +197,13 @@ DatabaseServer::load(const char * path)
 				if(!(strcmp(command, "into")))
 				{
 					memset(command, 0, commandSize);
-					c = fgetc(FP);
+					c = fgetc(FP); 
 					for( unsigned int i = 0; isLetter(c) && (c != ';') && (i < commandSize); ++i )
 					{
 						command[i] = c;
-						c = fgetc(FP);
+						c = fgetc(FP); 
 					}
-					
+
 					if(!databases[index].tables.size())
 						throw "Could not INSERT INTO non-existent table";
 					
@@ -212,7 +214,7 @@ DatabaseServer::load(const char * path)
 							//printf("INSERT INTO TABLE %s\n", command); fflush(stdout);
 							
 							std::vector<int> argIndexes;
-							
+							//argIndexes.clear();
 							// keep iterating until end of statement
 							while(c != ')')
 							{
@@ -220,18 +222,18 @@ DatabaseServer::load(const char * path)
 								
 								if(!isLetter(c) && !isNumber(c))
 								{
-									c = fgetc(FP);
+									c = fgetc(FP); 
 									continue;
 								}
 								
 								for( unsigned int i = 0; (isLetter(c) || isNumber(c)) && (i < commandSize); ++i )
 								{
 									command[i] = c;
-									c = fgetc(FP);
+									c = fgetc(FP); 
 								}
 								for(unsigned int i = 0; i < databases[index].tables[table_i].columns.size(); ++i)
 								{
-								//	printf("name: %s ; command: %s\n", &databases[index].tables[table_i].columns[i].name[0], command);
+									//printf("name: %s ; command: %s\n", &databases[index].tables[table_i].columns[i].name[0], command);
 									if(!strcmp(&databases[index].tables[table_i].columns[i].name[0], command))
 									{	
 										//printf("index = %d\n", i); fflush(stdout);
@@ -239,37 +241,38 @@ DatabaseServer::load(const char * path)
 										break;
 									}
 								}
-								c = fgetc(FP);
+								c = fgetc(FP); 
 							}
-							while(!isLetter(c)) c = fgetc(FP);
+							while(!isLetter(c)) { c = fgetc(FP);  }
 							for( unsigned int i = 0; isLetter(c) && (i < commandSize); ++i )
 							{
 								command[i] = tolower(c);
-								c = fgetc(FP);
-							}							
+								c = fgetc(FP); 
+							}					
 							if(!strcmp(command, "values"))
 							{
-								c = fgetc(FP);
+								c = fgetc(FP); 
 								while(c != ';')
 								{
 									int arg_i = 0;
 									bool isString = false;
 									
-									while((c == '\'') || !isNumber(c)) c = fgetc(FP);
+									while((c == '\'') || !isNumber(c)) { c = fgetc(FP); }
 									
 									while(c != ')')
-									{	
+									{
 										memset(command, 0, commandSize);
 
 										if(c == '\'' && !isString)
 										{
-											c = fgetc(FP);
+											c = fgetc(FP); 
 											for(unsigned int i = 0; (c != '\'') && (i < commandSize); ++i)
 											{
 												command[i] = c;
-												c = fgetc(FP);
+												c = fgetc(FP); 
 											}
-											databases[index].tables[table_i].columns[argIndexes[arg_i++]].values.push_back(std::string(command));
+											databases[index].tables[table_i].columns[argIndexes[arg_i]].values.push_back(std::string(command));
+											arg_i += 1;
 											isString = true;
 										}
 										else
@@ -283,7 +286,7 @@ DatabaseServer::load(const char * path)
 												}
 												else
 												{
-													c = fgetc(FP);
+													c = fgetc(FP); 
 													continue;
 												}
 											}
@@ -292,28 +295,30 @@ DatabaseServer::load(const char * path)
 												command[i] = c;
 											}
 											//printf("command : %s\n", command);
-											databases[index].tables[table_i].columns[argIndexes[arg_i++]].values.push_back(std::string(command));
+											//printf("arg_i : %d\n", arg_i); fflush(stdout);
+											//printf("size : %d\n", argIndexes.size()); fflush(stdout);
+											databases[index].tables[table_i].columns[argIndexes[arg_i]].values.push_back(std::string(command));
+											arg_i += 1;
 										}
-										c = fgetc(FP);
+										c = fgetc(FP); 
 									}
-									c = fgetc(FP);
-								}
-							}
-						}
-					}
-				}
-			}
-		}
+									c = fgetc(FP); 
+								} //printf("end of value;\n");
+								//c = fgetc(FP);
+							} //printf("end of values;\n");
+						} //printf("end of command;\n");
+					} //printf("end of tables;\n");
+				} //printf("end of INSERT INTO command;\n");
+			} //printf("begin of INSERT INTO command;\n");
+		} //printf("EOF reached . . .\n");
 		fclose(FP);
 	}
-	
 	catch(const char * exception)
 	{
 		printf("Error: %s\n", exception);
 		return -1;
 	}
-
-	// use default database at index 0
+	// set default database index to 0
 	index = 0;
 	return 0;
 }
@@ -373,7 +378,7 @@ DatabaseServer::save(const char * path)
 			for(unsigned int vi = 0; vi < lastVal; ++vi)
 			{
 				fprintf(FP, "( ");
-				for(unsigned int k = 0; k < lastCol+1; ++k)
+				for(unsigned int k = 0; k < lastCol; ++k)
 				{
 					if(isLetter(databases[i].tables[j].columns[k].values[vi][0]) || isDate(&databases[i].tables[j].columns[k].values[vi][0]))
 					{
@@ -394,7 +399,7 @@ DatabaseServer::save(const char * path)
 				}
 			}
 			fprintf(FP, "( ");
-			for(unsigned int k = 0; k < lastCol+1; ++k)
+			for(unsigned int k = 0; k < lastCol; ++k)
 			{
 				if(isLetter(databases[i].tables[j].columns[k].values[lastVal][0]) || isDate(&databases[i].tables[j].columns[k].values[lastVal][0]))
 				{
@@ -422,8 +427,7 @@ DatabaseServer::save(const char * path)
 std::string
 DatabaseServer::select()
 {
-	std::string selected;
-	
+	std::string selected;	
 	try
 	{
 //		printf("select ");
@@ -502,14 +506,24 @@ DatabaseServer::select()
 					char * value3 = (char *) calloc(size+1, sizeof(char));
 					strncpy(value3, bufferPtr-size, size);
 //					printf("%s ", value3); fflush(stdout);
-					
+	
 					int indexY = -1;
+					
+					if(!databases.size())
+						throw "Cannot SELECT from non-existent database.";
+					if(!databases[index].tables.size())
+						throw "Cannot SELECT from non-existent database table";
 					
 					for(unsigned int i = 0; i < databases[index].tables.size(); ++i)
 					{
+						//printf("name: %s\n", &databases[index].tables[i].name[0]);
+						//printf("table: %s\n", table);
 						if(!strcmp(&databases[index].tables[i].name[0], table))
 						{
 //							printf("table found!\n"); fflush(stdout);
+							if(!databases[index].tables[i].columns.size())
+								throw "Cannot SELECT from non-existent database table column";
+
 							for(unsigned int j = 0; j < databases[index].tables[i].columns.size(); ++j)
 							{
 								if(!strcmp(&databases[index].tables[i].columns[j].name[0], value2))
@@ -535,7 +549,7 @@ DatabaseServer::select()
 								if(!strcmp(&databases[index].tables[i].columns[j].name[0], value))
 								{
 									selected = databases[index].tables[i].columns[j].values[indexY];
-//									printf("search result: %s\n", &databases[index].tables[i].columns[j].values[indexY][0]);
+									//printf("search result: %s\n", &databases[index].tables[i].columns[j].values[indexY][0]); fflush(stdout);
 								}
 							}
 						}
@@ -557,6 +571,10 @@ DatabaseServer::select()
 	catch(const char * exception)
 	{
 		printf("Error: %s\n", exception);
+//		free(value);
+//		free(value2);
+//		free(value3);
+//		free(table);
 		return std::string("!OK");
 	}
 	return selected;
@@ -565,6 +583,8 @@ DatabaseServer::select()
 int
 DatabaseServer::insert()
 {
+//	printf("insert\n");
+	
 	std::vector<std::string> names;
 	std::vector<std::string> values;
 	
@@ -574,7 +594,7 @@ DatabaseServer::insert()
 
 	// get table name
 	size = 0; bufferPtr++;
-	while(*bufferPtr != ' ') 
+	while(*bufferPtr != ' ')
 	{
 		if(size >= maxSize)
 		{
@@ -636,15 +656,20 @@ DatabaseServer::insert()
 
 	}
 	free(buff);
-	
+
+	if(!databases.size())
+	{
+		printf("Could not INSERT INTO non-existent database"); fflush(stdout);
+		return -1;
+	}	
 	if(!databases[index].tables.size())
 	{
-		printf("Could not INSERT INTO non-existent table");
+		printf("Could not INSERT INTO non-existent table"); fflush(stdout);
 		return -1;
 	}
 	if(names.size() != values.size())
 	{
-		printf("Number of names is not equal to number of values.");
+		printf("Number of names is not equal to number of values."); fflush(stdout);
 		return -1;
 	}
 	
