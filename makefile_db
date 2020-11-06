@@ -1,0 +1,24 @@
+CC = gcc
+CXX = g++
+CFLAGS = -Wall -static -pthread -O3
+CXXFLAGS = -Wall -static -O3 -Wl,--whole-archive -lpthread -Wl,--no-whole-archive
+
+MAKE = make
+
+OBJECTS = server.o arpa_socket.o arpa_listen_socket.o database_server.o
+EXEC = db
+
+.PHONY: all clean run db
+
+all: $(OBJECTS)
+	$(CXX) -o $(EXEC) db.cpp $(OBJECTS) $(CXXFLAGS)
+
+$(OBJECTS): %.o: %.cpp
+	$(CXX) -c $(CXXFLAGS) $< -o $@
+
+clean:
+#	@rm *.o
+	@rm $(EXEC)
+
+run:
+	@./$(EXEC)

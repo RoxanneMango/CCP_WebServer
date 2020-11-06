@@ -1,0 +1,42 @@
+<!DOCTYPE HTML>
+<html lang="en">
+<head>
+	<title>Register</title>
+	<meta name="viewport" content="initial-scale=1">
+	<link href="style.css" rel="stylesheet" type="text/css">
+</head>
+<body>
+	<div align="center">
+		<h1>HU_land_C_Games</h1>
+		
+		<hr class="divider">
+		
+		<div class="menu">
+			<div class="formContainer">
+				<form method="post" id="register" action="/register" autocomplete="off">
+					<h3>Register</h3>
+					<hr>
+					<label>
+						<input class="formInput" id="name_register" placeholder="display_name" type="text" name="name">
+					</label>
+				<br>
+					<label>
+						<input class="formInput" id="username" placeholder="username" type="text" name="username" value="" maxLength="16">
+					</label>
+				<br>
+					<label>
+						<input class="formInput" id="password_register" placeholder="password" type="password" name="password">
+					</label>
+				<br>
+				<hr>
+					<input class="formButton" type="submit" value="Register">
+				</form>
+			</div>
+			<div id="errorResponse"></div>
+		</div>
+		<hr class="divider">
+		<a href="index.html"><input class="button" type="submit" name="home_button" value="back"\></a>
+	</div>
+	<script type="text/javascript" src="register.js"></script>
+</body>
+</html>
