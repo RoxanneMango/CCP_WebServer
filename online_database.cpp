@@ -70,7 +70,15 @@ OnlineDatabase::insert(std::string query)
 int
 OnlineDatabase::update(std::string query)
 {
-	return 0;
+	clearBuffers();
+	
+	socket.connectSocket();
+	socket.writeSocket(&query[0] , strlen(&query[0])+1);
+	socket.readSocket(receiveBuffer, bufferSize);
+//	printf("receiveBuffer: %s\n", receiveBuffer); fflush(stdout);
+	socket.disconnectSocket();
+	
+	return atoi(receiveBuffer);
 }
 int
 OnlineDatabase::drop(std::string query)

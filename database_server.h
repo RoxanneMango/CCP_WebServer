@@ -56,7 +56,10 @@ private:
 
 	bool isLetter(char c);
 	bool isNumber(char c);
+	
+	bool isString(char * string);
 	bool isDate(char * string);
+	bool isIp(char * string);
 	
 public:
 	DatabaseServer(unsigned int id, Socket & listener, Socket & client, unsigned int bufferSize);

@@ -394,16 +394,30 @@ WebServer::login(std::string token, std::string username, std::string password, 
 	}
 	
 	std::string q1 = "SELECT password FROM Players WHERE username = '" + username + "';";
+	if(strcmp(&databases[selectedDatabase]->select(q1)[0], &password[0]))
+		return "could not match username to password";
+	
 	std::string q2 = "SELECT superUser FROM Players WHERE username = '" + username + "';";
 	std::string q3 = "SELECT name FROM Players WHERE username = '" + username + "';";
+	loggedInUsers.push_back(User(loggedInUsers.size(), databases[selectedDatabase]->select(q3), username, password, (atoi(&databases[selectedDatabase]->select(q2)[0]) == 1 ? true : false)));
+	loggedInUsers[loggedInUsers.size()-1].login(token, ip);
+
+	std::string q4 = "UPDATE Players SET ip = " + ip + "; WHERE username = " + username + ";";
+
+	// get current time
+	const int max = 32;
+	time_t currentTime = time(0);
+	char lastLogin[max];
+	strftime(lastLogin, max, "%d:%m:%Y:%X", gmtime(&currentTime));
+	std::string q5 = "UPDATE Players SET lastLogin = " + std::string(lastLogin) + "; WHERE username = " + username + ";";
+
+	if(databases[selectedDatabase]->update(q4) < 0)
+		printf("Could not update user ip.\n");
+	if(databases[selectedDatabase]->update(q5) < 0)
+		printf("Could not update user lastLogin.\n");
+
+	return "OK";
 	
-	if(!strcmp(&databases[selectedDatabase]->select(q1)[0], &password[0]))
-	{
-		loggedInUsers.push_back(User(loggedInUsers.size(), databases[selectedDatabase]->select(q3), username, password, (atoi(&databases[selectedDatabase]->select(q2)[0]) == 1 ? true : false)));
-		loggedInUsers[loggedInUsers.size()-1].login(token, ip);
-		return "OK";
-	}
-	return "could not match username to password";
 }
 
 const char *
@@ -424,17 +438,14 @@ WebServer::registerUser(std::string name, std::string username, std::string pass
 
 	std::string q1 = "SELECT username FROM Players WHERE username = '" + username + "';";
 	if(!strcmp(&databases[selectedDatabase]->select(q1)[0], &username[0]))
-	{
 		return "This username is already taken";
-	}
 	
 	std::string q2 = "INSERT INTO Players superUser = " + std::string(isAdmin ? "1" : "0") + ", name = " + name + ", username = " + username + ", password = " + password + ";";
-	if(!databases[selectedDatabase]->insert(q2))
-	{
-		printf("Registered user with \n\tname {%s};\n\tusername {%s};\n\tpassword {%s};\n", &name[0], &username[0], &password[0]);
-		return "OK";
-	}
-	return "!OK";
+	if(databases[selectedDatabase]->insert(q2) < 0)
+		return "!OK";
+
+	printf("Registered user with \n\tname {%s};\n\tusername {%s};\n\tpassword {%s};\n", &name[0], &username[0], &password[0]);
+	return "OK";
 }
 
 bool
