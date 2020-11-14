@@ -12,14 +12,27 @@
 		<div class="word_container">
 			<div id="UserInfo">
 				<div class="name"></div>
-			</div></div>
+			</div>
+		</div>
 		
-		<div class="menu">			
-			<a><button id="blackjackJoinButton" class="button" name="join_button" value="join">join</button></a>
-			<br>
-			<a><button id="blackjackStartButton" class="button" name="start_button" value="start">start</button></a>
-			<br>
-			<a><button id="blackjackStopButton" class="button" name="stop_button" value="stop">stop</button></a>
+		<div class="menu">
+			<div id="blackjackStart">
+				<a><button id="blackjackStartButton" class="button" name="start_button" value="start">start</button></a>
+			</div>
+			<div id="blackjackBet">
+				<form id="blackjackBetForm" class="formContainer" method="post" action="/blackjack">
+					<input id="blackjack_bet" class="formInput" placeholder="0.0" type="number" name="betAmount" min="0" max="4000" step="0.5">
+					<input id="blackJackBetButton" class="formButton" type="submit" value="bet">
+					<div id="errorResponse"></div>
+				</form>
+			</div>
+			<div id="blackjackHands">
+				<div id="blackjackDealerHand">&diams; &clubs;</div>
+				<div id="blackjackPlayerHand">&hearts; &spades;</div>
+			</div>
+			<div id="blackjackStop">
+				<a><button id="blackjackStopButton" class="button" name="stop_button" value="stop">stop</button></a>
+			</div>
 		</div>
 		<hr class="divider">
 		<a href="about.html" target="_blank">

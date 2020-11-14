@@ -124,7 +124,7 @@ Param::getKeyAndValue(char * receiveBuffer)
 					// copy contents of key into empty char *
 					// reset key to 0
 					keys.push_back((char *) calloc(paramSize, sizeof(char)));
-					strncpy(keys[key_vec_i], key, strlen(key));
+					strcpy(keys[key_vec_i], key);
 					memset(key, 0, paramSize);
 
 					// increment keys vector index with one
@@ -165,7 +165,7 @@ Param::getKeyAndValue(char * receiveBuffer)
 					// copy contents of value into empty char *
 					// reset value to 0
 					values.push_back((char *) calloc(paramSize, sizeof(char)));
-					strncpy(values[value_vec_i], value, strlen(value));
+					strcpy(values[value_vec_i], value);
 					memset(value, 0, paramSize);
 					
 					// increment values vector index with one

@@ -11,7 +11,6 @@ WebServer::WebServer( Socket & serverSocket, Socket & clientSocket, Param & para
 	this->header = (char *) calloc(headerSize, sizeof(char));
 	
 	RESPONSE = (char *) calloc(64, sizeof(char));
-	
 }
 
 WebServer::~WebServer()
@@ -81,23 +80,23 @@ WebServer::checkRequestType()
 	int type;
 	if(strncmp(receiveBuffer, "POST", 4) == 0)
 	{
-		type = POST;
+		type = Post;
 	}
 	else if(strncmp(receiveBuffer, "GET", 3) == 0)
 	{
-		type = GET;
+		type = Get;
 	}
 	else if(strncmp(receiveBuffer, "PUT", 3) == 0)
 	{
-		type = PUT;
+		type = Put;
 	}
 	else if(strncmp(receiveBuffer, "PATCH", 5) == 0)
 	{
-		type = PATCH;
+		type = Patch;
 	}
 	else if(strncmp(receiveBuffer, "DELETE", 6) == 0)
 	{
-		type = DELETE;
+		type = Delete;
 	}
 	else
 	{
@@ -198,7 +197,6 @@ WebServer::processParam()
 {
 	try
 	{
-		
 		// default return message
 		snprintf(buffer, 3, "%s", OK_CODE);
 		
@@ -207,7 +205,6 @@ WebServer::processParam()
 			throw "Please do not do that.";
 		if( (param.keys.size() < 1) || (param.values.size() < 1) )
 			throw "There were no params";
-		
 		if(strncmp(receiveBuffer, "POST /register", 14) == 0)
 		{
 			if(param.values.size() < 3)
@@ -281,10 +278,9 @@ WebServer::processParam()
 		else if(strncmp(receiveBuffer, "POST /blackjack", 15) == 0)
 		{
 			// { command_key : command_value, token : <token> }
-			if( (param.keys.size() < 2) || (param.values.size() < 2) )
-			{
+			if( (param.keys.size() < 1) || (param.values.size() < 1) )
 				throw "Not enough keys or values for blackjack command.";
-			}
+
 			// add ip address to param; Param class deallocates allocated resources automatically
 			char * ip_key = (char *) calloc(7, sizeof(char));
 			strcpy(ip_key, "ip_key");
@@ -300,12 +296,10 @@ WebServer::processParam()
 				if(games[i]->name == "Black Jack")
 				{
 					// check if a user wants to join, and if they do verify their ip and token
-					if(!(strcmp(param.keys[0], "blackjack")) && !(strcmp(param.values[0], "join")) && !(strcmp(param.keys[1], "token")))
+					if(!strcmp(param.keys[0], "join"))
 					{
 						if(games[i]->isRunning())
-						{
 							throw "GAME_ALREADY_IN_PROGRESS";
-						}
 						
 						for(unsigned int i = 0; i < loggedInUsers.size(); ++i)
 						{
@@ -313,23 +307,24 @@ WebServer::processParam()
 							if(loggedInUsers[i].getIp() == clientSocket.getIpAddress())
 							{
 								// then verify their token
-								if(loggedInUsers[i].getToken() == param.values[1])
+								if(loggedInUsers[i].getToken() == param.values[0])
 								{
 									// only if both the ip and the token have been verified, add user to game if it isn't at max users yet
 									if(games[i]->currentUsers < games[i]->maxUsers)
 									{
 										// check if user isn't already added to game
-										for(unsigned int i = 0; i < games[i]->users.size(); ++i)
+										if(games[i]->users.size() > 1)
 										{
-											if(loggedInUsers[i].getId() == games[i]->users[i]->getId())
+											for(unsigned int i = 0; i < games[i]->users.size(); ++i)
 											{
-												throw "USER_ALREADY_ADDED_TO_GAME";
+												if(loggedInUsers[i].getId() == games[i]->users[i].getId())
+												{
+													throw "USER_ALREADY_ADDED_TO_GAME";
+												}
 											}
 										}
-										games[i]->users.push_back(&loggedInUsers[i]);
+										games[i]->users.push_back(loggedInUsers[i]);
 										games[i]->currentUsers += 1;
-										printf("added user to game!\n");
-										
 										return;
 									}
 									else
@@ -394,30 +389,18 @@ WebServer::login(std::string token, std::string username, std::string password, 
 	}
 	
 	std::string q1 = "SELECT password FROM Players WHERE username = '" + username + "';";
-	if(strcmp(&databases[selectedDatabase]->select(q1)[0], &password[0]))
-		return "could not match username to password";
-	
 	std::string q2 = "SELECT superUser FROM Players WHERE username = '" + username + "';";
 	std::string q3 = "SELECT name FROM Players WHERE username = '" + username + "';";
-	loggedInUsers.push_back(User(loggedInUsers.size(), databases[selectedDatabase]->select(q3), username, password, (atoi(&databases[selectedDatabase]->select(q2)[0]) == 1 ? true : false)));
-	loggedInUsers[loggedInUsers.size()-1].login(token, ip);
-
-	std::string q4 = "UPDATE Players SET ip = " + ip + "; WHERE username = " + username + ";";
-
-	// get current time
-	const int max = 32;
-	time_t currentTime = time(0);
-	char lastLogin[max];
-	strftime(lastLogin, max, "%d:%m:%Y:%X", gmtime(&currentTime));
-	std::string q5 = "UPDATE Players SET lastLogin = " + std::string(lastLogin) + "; WHERE username = " + username + ";";
-
-	if(databases[selectedDatabase]->update(q4) < 0)
-		printf("Could not update user ip.\n");
-	if(databases[selectedDatabase]->update(q5) < 0)
-		printf("Could not update user lastLogin.\n");
-
-	return "OK";
 	
+	printf("selected = %d\n", selectedDatabase);
+	
+	if(!strcmp(&databases[selectedDatabase]->select(q1)[0], &password[0]))
+	{
+		loggedInUsers.push_back(User(loggedInUsers.size(), databases[selectedDatabase]->select(q3), username, password, (atoi(&databases[selectedDatabase]->select(q2)[0]) == 1 ? true : false)));
+		loggedInUsers[loggedInUsers.size()-1].login(token, ip);
+		return "OK";
+	}
+	return "could not match username to password";
 }
 
 const char *
@@ -438,14 +421,17 @@ WebServer::registerUser(std::string name, std::string username, std::string pass
 
 	std::string q1 = "SELECT username FROM Players WHERE username = '" + username + "';";
 	if(!strcmp(&databases[selectedDatabase]->select(q1)[0], &username[0]))
+	{
 		return "This username is already taken";
+	}
 	
 	std::string q2 = "INSERT INTO Players superUser = " + std::string(isAdmin ? "1" : "0") + ", name = " + name + ", username = " + username + ", password = " + password + ";";
-	if(databases[selectedDatabase]->insert(q2) < 0)
-		return "!OK";
-
-	printf("Registered user with \n\tname {%s};\n\tusername {%s};\n\tpassword {%s};\n", &name[0], &username[0], &password[0]);
-	return "OK";
+	if(!databases[selectedDatabase]->insert(q2))
+	{
+		printf("Registered user with \n\tname {%s};\n\tusername {%s};\n\tpassword {%s};\n", &name[0], &username[0], &password[0]);
+		return "OK";
+	}
+	return "!OK";
 }
 
 bool
@@ -460,7 +446,7 @@ WebServer::logout(std::string token, std::string ip)
 			break;
 		}
 	}
-	printf("loggedInUsers = %ld\n", loggedInUsers.size());
+	printf("loggedInUsers = %lu\n", loggedInUsers.size());
 	return true;
 }
 

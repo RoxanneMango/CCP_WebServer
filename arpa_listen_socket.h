@@ -8,14 +8,14 @@
 
 #include "arpa_socket.h"
 
-class ArpaListenSocket : public ArpaSocket
+class ListenSocket : public Socket
 {
 private:
 	const char * ip;
 	unsigned short port;
 
 public:
-	ArpaListenSocket(const char * ip, unsigned short port);
+	ListenSocket(const char * ip, unsigned short port);
 };
 
 #endif // ARPA_LISTEN_SOCKET

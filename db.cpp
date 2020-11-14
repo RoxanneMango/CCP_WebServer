@@ -1,6 +1,6 @@
-#include <thread>
-
-#include "arpa_listen_socket.h"
+#include "socket.h"
+#include "sleep.h"
+#include "thread.h"
 #include "database_server.h"
 
 void saveTimer(DatabaseServer & db, const char * saveFile);
@@ -14,8 +14,8 @@ main(int argc, char ** argv)
 	const char * ip			= 	"127.0.0.1";
 	unsigned short port		=	44901;
 	//
-	ArpaListenSocket	listenSocket(ip, port);
-	ArpaSocket 			connectionSocket;
+	ListenSocket		listenSocket(ip, port);
+	Socket		 		connectionSocket;
 	DatabaseServer		database(id, listenSocket, connectionSocket, bufferSize);
 		
 	const char * loadFile = (argc == 2) ? argv[1] : "database.db";
@@ -34,7 +34,7 @@ main(int argc, char ** argv)
 		printf("Could not save to file.");
 		return -1;
 	}
-//	std::thread autoSave(saveTimer2, *saveFile);
+	
 	std::thread autoSave(saveTimer, std::ref(database), saveFile);
 	
 	printf("db listening on %s:%d . . .\n", ip, port);
@@ -58,6 +58,6 @@ saveTimer(DatabaseServer & db, const char * saveFile)
 		printf("Saving . . .\n");
 		db.save(saveFile);
 		printf("Save successful.\n");
-		sleep(60);
+		SLEEP(60);
 	}
 }

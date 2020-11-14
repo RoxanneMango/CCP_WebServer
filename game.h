@@ -17,7 +17,7 @@ public:
 	unsigned int minUsers;
 	unsigned int currentUsers;
 	unsigned int maxUsers;
-	std::vector<User *> users;
+	std::vector<User> users;
 
 	virtual std::string input(Param param) = 0;
 	

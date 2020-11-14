@@ -129,6 +129,12 @@ a {
 	color: green;
 }
 
+input[type=number]::-webkit-inner-spin-button, 
+input[type=number]::-webkit-outer-spin-button { 
+  -webkit-appearance: none; 
+  margin: 0; 
+}
+
 .button {
 	display: inline-block;
 	width: 25%;
@@ -137,6 +143,9 @@ a {
 	border: 3px groove #cfcfcf;
 	padding: 10px;
 	margin-bottom: 3%;
+   -webkit-appearance: none;
+   -moz-appearance: none;
+   appearance: none;
 } .button:hover {
 	cursor: pointer;
 	color: green;
@@ -145,3 +154,4 @@ a {
 } .menu button:last-child .button {
 	margin: 0;
 }
+

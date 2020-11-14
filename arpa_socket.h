@@ -6,18 +6,17 @@
 #include <stdio.h>
 #include <string.h>
 
-#include "socket.h"
-
-class ArpaSocket : public Socket
+class Socket
 {
 protected:
+	int fileDescriptor;
 	struct sockaddr_in arpaSocket;
 	socklen_t addressLength;
 
 public:
-	ArpaSocket(const char * ip, unsigned short port);
-	ArpaSocket();
-	~ArpaSocket();
+	Socket(const char * ip, unsigned short port);
+	Socket();
+	~Socket();
 	
 	void listenSocket(Socket & s);
 	

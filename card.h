@@ -28,9 +28,11 @@ public:
 	
 	void setPictureValue(Picture picture);
 	int getPictureValue();
+	char getPicture();
 	
 	void setSuit(Suit suit);
-	int getSuit();
+	int getSuitValue();
+	char getSuit();
 	
 	void setMinCardValue(int value);
 	void setMaxCardValue(int value);

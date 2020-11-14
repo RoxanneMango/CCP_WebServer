@@ -1,11 +1,12 @@
 #ifndef THREAD_H
 #define THREAD_H
 
-class Thread
-{
-public:
-	virtual void createThread(void * function(void *), void * argv) = 0;
-	virtual void exitThread(void * return_value) = 0;
-};
+#if defined(WIN32) || defined(_WIN32) || defined(__WIN32__) || defined(__NT__)
+	#include "mingw.thread.h"
+#elif defined(__linux__) || (__unix__) || defined(_POSIX_VERSION)
+	#include <thread>
+#else
+	#error "Unknown compiler"
+#endif
 
 #endif // THREAD_H

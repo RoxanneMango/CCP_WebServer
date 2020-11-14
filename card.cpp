@@ -53,6 +53,7 @@ Card::Card(Picture picture, Suit suit)
 		else
 		{
 			this->picture = picture;
+			this->value = 10;
 		}
 		
 		if(suit < 0)
@@ -141,6 +142,16 @@ Card::getPictureValue()
 	return picture;
 }
 
+char
+Card::getPicture()
+{
+	if(picture == 1) return 'J';
+	if(picture == 2) return 'Q';
+	if(picture == 3) return 'K';
+	if(picture == 4) return 'A';
+	return 'N';
+}
+
 void
 Card::setSuit(Suit suit)
 {
@@ -167,9 +178,18 @@ Card::setSuit(Suit suit)
 }
 
 int
-Card::getSuit()
+Card::getSuitValue()
 {
 	return suit;
+}
+
+char
+Card::getSuit()
+{
+	if(suit == 0) return 'H';
+	if(suit == 1) return 'C';
+	if(suit == 2) return 'D';
+	return 'S';
 }
 
 void

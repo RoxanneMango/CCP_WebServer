@@ -23,8 +23,7 @@ INSERT INTO Players
 )
 VALUES
 ( 0, 1, 'root', 'root', 'midnightsnack', 'null', 'null', 'null', 20.00, 'Euro', '01:01:1970:00:00:00', 'null' ),
-( 1, 0, 'user', 'username', 'password', 'null', 'null', 'null', 1.00, 'Dollar', '01:01:1970:00:00:00', 'null' ),
-( 2, 0, 'carrot', 'carrot', 'password', 'null', 'null', 'null', 'null', 'null', '06:11:2020:05:02:50', 'null' );
+( 1, 0, 'user', 'username', 'password', 'null', 'null', 'null', 1.00, 'Dollar', '01:01:1970:00:00:00', 'null' );
 
 CREATE DATABASE Games
 

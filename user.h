@@ -4,6 +4,7 @@
 #include <vector>
 
 #include "chip.h"
+#include "card.h"
 
 class User
 {
@@ -42,9 +43,13 @@ public:
 	// otherwise look at second hand, then terminate message with a semi-colon ;
 	// dealer has user_id of -1
 	// dealer cannot have a second hand
-	std::vector<std::string> hand;
+//	std::vector<std::string> hand;
+
+	// a user can potentially have 2 hands
+	std::vector<Card> hand[2];
 	std::vector<Chip> chips;
-	std::vector<Chip> bettingAmount;
+//	std::vector<Chip> bettingAmount;
+	double bettingAmount;
 	
 	void addChips(User & user, Chip chip);
 	void removeChips(User & user, Chip chip);
@@ -57,12 +62,15 @@ public:
 	
 	double getBettingAmount()
 	{
+		/*
 		double amount = 0.0;
 		for(unsigned int i = 0; i < bettingAmount.size(); ++i)
 		{
 			amount += bettingAmount[i].getAmount();
 		}
 		return amount;
+		*/
+		return bettingAmount;
 	}
 	
 	void login(std::string token, std::string ip);

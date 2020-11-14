@@ -13,7 +13,7 @@ void
 DatabaseServer::processQuery()
 {
 	// sanitize input from bufferPtr and do stuff with it . . .	
-//	printf("Incoming query ->\n\t%s\n", receiveBuffer); fflush(stdout);
+	printf("Incoming query ->\n\t%s\n", receiveBuffer); fflush(stdout);
 	
 	bufferPtr = receiveBuffer;
 
@@ -247,14 +247,17 @@ DatabaseServer::load(const char * path)
 								c = fgetc(FP); 
 							}
 							while(!isLetter(c)) { c = fgetc(FP);  }
+							memset(command, 0, commandSize);
 							for( unsigned int i = 0; isLetter(c) && (i < commandSize); ++i )
 							{
 								command[i] = tolower(c);
 								c = fgetc(FP); 
-							}					
+							}
+							//printf("command: %s\n", command); fflush(stdout);
 							if(!strcmp(command, "values"))
 							{
-								c = fgetc(FP); 
+								c = fgetc(FP);
+								//printf("%c", c); fflush(stdout);
 								while(c != ';')
 								{
 									int arg_i = 0;
@@ -377,12 +380,16 @@ DatabaseServer::save(const char * path)
 			
 			unsigned int lastCol = databases[i].tables[j].columns.size()-1;
 			unsigned int lastVal = databases[i].tables[j].columns[lastCol].values.size()-1;
-			
+
 			for(unsigned int vi = 0; vi < lastVal; ++vi)
 			{
 				fprintf(FP, "( ");
 				for(unsigned int k = 0; k < lastCol; ++k)
 				{
+					//printf("???\n"); fflush(stdout);
+					//printf("table: %s\n",&databases[i].tables[j].name[0]); fflush(stdout);
+					//printf("column: %s\n",&databases[i].tables[j].columns[k].name[0]); fflush(stdout);
+					//printf("values size: %u\n",databases[i].tables[j].columns[k].values.size()); fflush(stdout);
 					if(isString(&databases[i].tables[j].columns[k].values[vi][0]))
 					{
 						fprintf(FP, "'%s', ", &databases[i].tables[j].columns[k].values[vi][0]);

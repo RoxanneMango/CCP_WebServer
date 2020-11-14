@@ -47,8 +47,8 @@ class WebServer : public Server
 public:
 	WebServer(Socket & serverSocket, Socket & clientSocket, Param & param);
 	~WebServer();
-	
-	enum TYPE { POST, GET, PUT, PATCH, DELETE };
+
+	enum Type { Post, Get, Put, Patch, Delete };
 
 	Param & param;
 
@@ -72,7 +72,6 @@ public:
 	const char * login(std::string token, std::string username, std::string password, std::string ip);
 	bool logout(std::string token, std::string ip);
 	bool verifyUser(std::string token, std::string ip);
-
 };
 
 #endif // WEB_SERVER_H

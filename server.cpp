@@ -11,6 +11,8 @@ Server::Server(	Socket & serverSocket, Socket & clientSocket ) :
 	this->receiveBuffer = (char *) calloc(bufferSize, sizeof(char));
 	this->tranceiveBuffer = (char *) calloc(bufferSize, sizeof(char));
 	this->buffer = (char *) calloc(bufferSize, sizeof(char));
+
+	selectedDatabase = 0;
 }
 
 Server::~Server()

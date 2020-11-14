@@ -1,10 +1,7 @@
 #include "arpa_listen_socket.h"
 
-ArpaListenSocket::ArpaListenSocket(const char * ip, unsigned short port)
-{
-	this->ip = ip;
-	this->port = port;
-	
+ListenSocket::ListenSocket(const char * ip, unsigned short port) : ip(ip), port(port)
+{	
 	try
 	{	
 		if( (fileDescriptor = socket(AF_INET, SOCK_STREAM, 0)) < 0 )

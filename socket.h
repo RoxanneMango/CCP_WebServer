@@ -1,18 +1,12 @@
 #ifndef SOCKET_H
 #define SOCKET_H
 
-class Socket
-{
-public:
-	int fileDescriptor;
-
-	virtual void connectSocket() = 0;
-	virtual void listenSocket(Socket & s) = 0;
-	virtual void writeSocket(char * buffer, unsigned int numOfBytes) = 0;
-	virtual void readSocket(char * buffer, unsigned int numOfBytes) = 0;
-	virtual void disconnectSocket() = 0;
-	
-	virtual char * getIpAddress() = 0;
-};
+#if defined(WIN32) || defined(_WIN32) || defined(__WIN32__) || defined(__NT__)
+	#include "winsock2_listen_socket.h"
+#elif defined(__linux__) || (__unix__) || defined(_POSIX_VERSION)
+	#include "arpa_listen_socket.h"
+#else
+	#error "Unknown compiler"
+#endif
 
 #endif // SOCKET_H

@@ -1,9 +1,8 @@
 #ifndef BLACK_JACK_H
 #define BLACK_JACK_H
 
-#include <unistd.h>
-#include <thread>
-
+#include "sleep.h"
+#include "thread.h"
 #include "game.h"
 #include "chip.h"
 #include "deck_of_cards.h"
@@ -90,6 +89,7 @@ private:
 	std::thread thread;
 	
 	bool running;
+	bool isReady;
 	
 	bool isUserTurn;
 	bool insuranceBet;
@@ -103,15 +103,20 @@ private:
 	
 	void shuffleDecks();
 	
+	int phase = 0;
+	
 	void bettingPhase();
 	//
-	bool dealingPhase();
-	bool hittingPhase();
-	bool settlementPhase();
+	void dealingPhase();
+	void hittingPhase();
+	void settlementPhase();
 	
 	unsigned int currentUserId;
 	
 	enum Decision { HIT = 0, STAND, DOUBLE_DOWN, SPLIT, SURRENDER, INSURANCE };
+	
+	Card getRandomCard();
+	std::string getHands();
 	
 public:
 	BlackJack(int id, unsigned int numOfDecks);
