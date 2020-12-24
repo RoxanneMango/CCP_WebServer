@@ -1,10 +1,11 @@
 #ifndef WEB_SERVER_H
 #define WEB_SERVER_H
 
+#include <time.h>
+
 #include "param.h"
 #include "file_io.h"
 #include "game.h"
-//#include "user.h"
 #include "blackjack_user.h"
 #include "server.h"
 #include "sleep.h"

@@ -476,7 +476,7 @@ WebServer::logout(std::string token, std::string ip)
 			break;
 		}
 	}
-	printf("loggedInUsers = %lu\n", loggedInUsers.size());
+	printf("loggedInUsers = %d\n", (int)loggedInUsers.size());
 	return true;
 }
 
