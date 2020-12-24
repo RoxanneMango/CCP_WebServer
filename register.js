@@ -32,7 +32,7 @@ async function registerUser(event)
 			}
 			else
 			{
-				document.getElementById("errorResponse").innerHTML = response.toString();
+				document.getElementById("errorResponseRegister").innerHTML = response.toString();
 			}
 		} 
 	)

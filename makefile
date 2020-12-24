@@ -7,7 +7,7 @@ CFLAGS = -Wall -static -O3
 CXXFLAGS = -Wall -std=c++14 -static -O3
 LIBS = -Wl,--whole-archive -lpthread -Wl,--no-whole-archive
 
-OBJECTS = file_io.o param.o server.o web_server.o black_jack.o chip.o card.o deck_of_cards.o user.o database_server.o online_database.o
+OBJECTS = file_io.o param.o server.o web_server.o black_jack.o chip.o card.o deck_of_cards.o user.o database_server.o online_database.o dealer.o blackjack_user.o
 EXEC = main
 
 ifeq ($(OS),Windows_NT)

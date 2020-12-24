@@ -28,8 +28,8 @@ DatabaseServer::processQuery()
 		}
 		if(!strncmp(bufferPtr-size, "select", size))
 		{
-			//printf("select: %s\n", &select()[0]);
-			sprintf(buffer, "%s", &select()[0]);
+			buffer.assign(select());
+//			sprintf(&buffer[0], "%s", &select()[0]);
 		}
 		else if(!strncmp(bufferPtr-size, "insert", size))
 		{
@@ -42,12 +42,14 @@ DatabaseServer::processQuery()
 			}
 			if(!strncmp(bufferPtr-size, "into", size))
 			{
-				sprintf(buffer, "%d", insert());
+				buffer.assign(std::to_string(insert()));
+//				sprintf(&buffer[0], "%d", insert());
 			}
 		}
 		else if(!strncmp(bufferPtr-size, "update", size))
 		{
-			sprintf(buffer, "%d", update());
+			buffer.assign(std::to_string(update()));
+//			sprintf(&buffer[0], "%d", update());
 		}
 	}
 

@@ -6,13 +6,26 @@
 	color: #cfcfcf;
 }
 
-#errorResponse {
+.errorResponse {
 	width: 100%;
 	margin: 3% 0%;
 	color: red;
 }
 
-.name {
+.settlement {
+	font-size: 5vw;
+	color: maroon;
+	-webkit-text-stroke: 1px black;
+	font-weight: bold;
+	background: transparent;
+	position: absolute;
+	text-align: center;
+	left: 44vw;
+	z-index: 1;
+	transform: rotate(-20deg);
+}
+
+.userInfo * {
 	display: inline-block;
 	margin: 1% 0%;
 	text-align: center;
@@ -65,6 +78,12 @@
 p {
 	text-align: justify;
 }
+h4.turnIndicator {
+	color: #cfcfcf;
+	font-size: 3vw;
+	display: inline-block;
+	margin: 2vw;
+}
 h1 {
 	font-size: 4vw;
 	text-align: center;
@@ -81,6 +100,16 @@ h3 {
 	white-space: nowrap;
 	padding: 10px;
 	margin: auto;
+	color: green;
+}
+
+h4 {
+	font-size: 2vw;
+	text-align: center;
+	font-weight: normal;
+	white-space: nowrap;
+	padding: 0;
+	margin: 0;
 	color: green;
 }
 
@@ -155,3 +184,44 @@ input[type=number]::-webkit-outer-spin-button {
 	margin: 0;
 }
 
+.card {
+	display: inline-block;
+	width: 7vw;
+	height: 10vw;
+	background: black;
+	border: 2px solid #cfcfcf;
+	border-radius: 5px;
+	margin: 1vw;
+	padding: 0;
+	z-index: 0;
+}
+
+.hidden{
+	background: #0c2b0e;
+}
+
+.cardValue {
+	position: relative;
+	color: #cfcfcf;
+	background: transparent;
+	font-size: 2vw;
+	font-weight: bold;
+	text-align: left;
+	margin: 0.5vw;
+	padding: 0;
+
+}
+.mirror {
+	transform: rotate(180deg);
+	margin: 0.5vw;
+}
+
+.cardSuit {
+	position: relative;
+	color: #cfcfcf;
+	background: transparent;
+	font-size: 3vw;
+	font-weight: bold;
+	margin: auto;
+	padding: 0;
+}

@@ -15,7 +15,7 @@ protected:
 	
 	char * receiveBuffer;
 	char * tranceiveBuffer;
-	char * buffer;
+	std::string buffer;
 
 	unsigned int selectedDatabase;
 	std::vector<Database *> databases;

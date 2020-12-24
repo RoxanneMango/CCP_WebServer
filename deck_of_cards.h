@@ -22,6 +22,7 @@ public:
 	void addCard(Card card);
 	
 	Card getCard(unsigned int index);
+	Card getCard();
 	Card getRandomCard();
 	int getNumOfCards();
 	

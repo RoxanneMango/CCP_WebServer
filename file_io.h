@@ -3,6 +3,7 @@
 
 #include <stdio.h>
 #include <string.h>
+#include <string>
 
 class FileIO
 {
@@ -11,9 +12,7 @@ private:
 public:
 	FileIO()
 	{}
-	
-	int getFileSize(const char * file);
-	void getFileContent(const char * file, char * output);
+	std::string getFileContent(const char * file);
 };
 
 

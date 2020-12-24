@@ -6,7 +6,8 @@
 #include "game.h"
 #include "chip.h"
 #include "deck_of_cards.h"
-#include "user.h"
+#include "blackjack_user.h"
+#include "dealer.h"
 
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *\
 *
@@ -85,38 +86,57 @@
 
 class BlackJack : public Game
 {
-private:
+private:	
 	std::thread thread;
 	
-	bool running;
-	bool isReady;
+	bool running = false;
+	//
+	bool isReady = false;
+	bool isDone = false;
+	//
+	bool isSplit = false;
+	bool isDoubleDown = false;
+	bool isNatural = false;
+	bool isSurrender = false;
+	bool isHit = false;
+	bool isStand = false;
+	//
+	bool canSplit = false;
+	bool canInsurance = false;
+	//
+	bool isWon[2] = {0};
+	bool isLose[2] = {0};
 	
-	bool isUserTurn;
-	bool insuranceBet;
-	bool isWon;
-	bool isDone;
-
+	int userTurnIndex = 0;
+	
 	unsigned int numOfDecks;
 	std::vector<DeckOfCards> cardDecks;
 	
+	Dealer dealer;
+	std::vector<BlackjackUser *> blackjackUsers;
+	
 	std::vector<double> bets;
-	
-	void shuffleDecks();
-	
-	int phase = 0;
+
+	double maxBettingAmount = 4000;
+	double bettingAmount[2] = {0};
+	double insuranceAmount = 0;
 	
 	void bettingPhase();
-	//
 	void dealingPhase();
+	void insurancePhase();
+	void splittingPhase();
 	void hittingPhase();
 	void settlementPhase();
 	
 	unsigned int currentUserId;
 	
-	enum Decision { HIT = 0, STAND, DOUBLE_DOWN, SPLIT, SURRENDER, INSURANCE };
+	enum State { BETTING = 0, DEALING, INSURANCE, SPLITTING, HITTING, SETTLEMENT };
 	
-	Card getRandomCard();
+	State state = State::BETTING;
+	
+	Card getCard();
 	std::string getHands();
+	int getSettlement();
 	
 public:
 	BlackJack(int id, unsigned int numOfDecks);
@@ -129,6 +149,8 @@ public:
 	void stop();
 	
 	bool isRunning();
+	
+	void addUser(void * user) override;
 };
 
 #endif // BLACK_JACK_H

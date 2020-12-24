@@ -5,12 +5,12 @@ Server::Server(	Socket & serverSocket, Socket & clientSocket ) :
 	clientSocket(clientSocket)
 {	
 	// default bufferSize
-	this->bufferSize = 4096;
+	this->bufferSize = 10240;
 	
 	// allocate memory for all the buffers with size bufferSize
 	this->receiveBuffer = (char *) calloc(bufferSize, sizeof(char));
 	this->tranceiveBuffer = (char *) calloc(bufferSize, sizeof(char));
-	this->buffer = (char *) calloc(bufferSize, sizeof(char));
+//	this->buffer = (char *) calloc(bufferSize, sizeof(char));
 
 	selectedDatabase = 0;
 }
@@ -20,7 +20,7 @@ Server::~Server()
 	// free all allocated memory for buffers
 	free(receiveBuffer);
 	free(tranceiveBuffer);
-	free(buffer);
+//	free(buffer);
 }
 
 void
@@ -35,7 +35,7 @@ Server::resizeBuffers()
 {
 	this->receiveBuffer = (char *) realloc(receiveBuffer, bufferSize * sizeof(char));
 	this->tranceiveBuffer = (char *) realloc(tranceiveBuffer, bufferSize * sizeof(char));
-	this->buffer = (char *) realloc(buffer, bufferSize * sizeof(char));
+//	this->buffer = (char *) realloc(buffer, bufferSize * sizeof(char));
 }
 
 void
@@ -71,7 +71,7 @@ Server::readSocket()
 void
 Server::writeSocket()
 {	
-	snprintf(tranceiveBuffer, strlen(buffer) + 1, "%s", buffer);
+	snprintf(tranceiveBuffer, buffer.size() + 1, "%s", &buffer[0]);
 	clientSocket.writeSocket(tranceiveBuffer, strlen(tranceiveBuffer));
 	clearBuffers();
 }
@@ -87,5 +87,6 @@ Server::clearBuffers()
 {
 	memset(receiveBuffer, 0, bufferSize);
 	memset(tranceiveBuffer, 0, bufferSize);
-	memset(buffer, 0, bufferSize);
+//	memset(buffer, 0, bufferSize);
+	buffer.clear();
 }

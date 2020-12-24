@@ -1,20 +1,3 @@
-/*
-window.addEventListener('load', () => init());
-
-function init()
-{
-	let register = document.querySelector("#register");
-	let registerForm = new URLSearchParams(new FormData(document.querySelector("#register")));
-	register.addEventListener("submit", (event) => registerUser(event, registerForm));
-	
-	let login = document.querySelector("#login");
-	let loginForm = new URLSearchParams(new FormData(document.querySelector("#login")));
-	login.addEventListener("submit", (event) => loginUser(event, loginForm));
-	
-	let logout = document.querySelector("#logout");
-	logout.addEventListener("submit", (event) => logoutUser(event));
-}
-*/
 async function registerUser(event, formData)
 {
 	event.preventDefault();

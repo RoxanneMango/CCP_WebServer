@@ -33,7 +33,7 @@ async function loginUser(event)
 				}
 				else
 				{
-					document.getElementById("errorResponse").innerHTML = response.toString();
+					document.getElementById("errorResponseLogin").innerHTML = response.toString();
 				}
 			}
 		)

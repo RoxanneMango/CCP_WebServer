@@ -3,8 +3,8 @@ window.addEventListener('load', () => userInfo());
 function userInfo()
 {
 	getName();
-	document.querySelector(".name").addEventListener("click", () => window.location.href = "user.html");
-	document.querySelector(".name").addEventListener("mouseover", () => document.querySelector(".name").style.cursor = "pointer" );
+//	document.querySelector(".name").addEventListener("click", () => window.location.href = "user.html");
+//	document.querySelector(".name").addEventListener("mouseover", () => document.querySelector(".name").style.cursor = "pointer" );
 }
 
 async function getName()

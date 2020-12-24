@@ -11,7 +11,7 @@ class Card
 	int value = 0;
 
 	int minCardValue = 1;
-	int maxCardValue = 10;
+	int maxCardValue = 11;
 	
 	bool hidden = false;
 public:
@@ -45,6 +45,11 @@ public:
 	bool isHidden();
 	
 	void print();
+	
+	bool operator == (Card & card)
+	{
+		return (this->value == card.getValue());
+	}
 	
 };
 

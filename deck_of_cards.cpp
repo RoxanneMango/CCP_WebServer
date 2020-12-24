@@ -71,6 +71,14 @@ DeckOfCards::addCard(Card card)
 }
 
 Card
+DeckOfCards::getCard()
+{
+	Card card = deck[deck.size()-1];
+	deck.pop_back();
+	return card;
+}
+
+Card
 DeckOfCards::getCard(unsigned int index)
 {
 	Card card = deck[index];

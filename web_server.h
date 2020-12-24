@@ -4,12 +4,14 @@
 #include "param.h"
 #include "file_io.h"
 #include "game.h"
-#include "user.h"
+//#include "user.h"
+#include "blackjack_user.h"
 #include "server.h"
+#include "sleep.h"
 
 class WebServer : public Server
 {
-	char * RESPONSE;
+	char * RESPONSE = 0;
 	//
 	const char * OK_RESPONSE = "HTTP/1.0 200 OK\r\n";
 	const char * FORBIDDEN_RESPONSE = "HTTP/1.0 403 forbidden\r\n";

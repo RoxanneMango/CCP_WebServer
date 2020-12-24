@@ -17,7 +17,16 @@ public:
 	unsigned int minUsers;
 	unsigned int currentUsers;
 	unsigned int maxUsers;
-	std::vector<User> users;
+	
+	std::vector<User *> users;
+
+	Game(int id) : id(id)
+	{}
+
+	virtual void addUser(void * user)
+	{
+		users.push_back((User *)user);
+	}
 
 	virtual std::string input(Param param) = 0;
 	

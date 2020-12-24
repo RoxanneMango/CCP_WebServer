@@ -11,6 +11,7 @@ WebServer::WebServer( Socket & serverSocket, Socket & clientSocket, Param & para
 	this->header = (char *) calloc(headerSize, sizeof(char));
 	
 	RESPONSE = (char *) calloc(64, sizeof(char));
+	strcpy(RESPONSE, "HTTP/1.0 200 OK\r\n");
 }
 
 WebServer::~WebServer()
@@ -36,8 +37,12 @@ WebServer::resizeHeader()
 void
 WebServer::writeSocket()
 {	
-	snprintf(tranceiveBuffer, strlen(RESPONSE) + strlen(header) + strlen(buffer) + 1, "%s%s%s", RESPONSE, header, buffer);
-	clientSocket.writeSocket(tranceiveBuffer, strlen(tranceiveBuffer));
+	int size = strlen(RESPONSE) + strlen(header) + buffer.size() + 1;
+	char * x = (char *) calloc(size, sizeof(char));
+	snprintf(x, size, "%s%s%s", RESPONSE, header, &buffer[0]);
+//	snprintf(tranceiveBuffer, strlen(RESPONSE) + strlen(header) + buffer.size() + 1, "%s%s%s", RESPONSE, header, &buffer[0]);
+	clientSocket.writeSocket(x, strlen(x));
+//	clientSocket.writeSocket(tranceiveBuffer, strlen(tranceiveBuffer));
 	clearBuffers();
 }
 
@@ -45,8 +50,7 @@ void
 WebServer::clearBuffers()
 {
 	memset(receiveBuffer, 0, bufferSize);
-	memset(tranceiveBuffer, 0, bufferSize);
-	memset(buffer, 0, bufferSize);
+	buffer.clear();
 	
 	memset(RESPONSE, 0, strlen(RESPONSE));
 	memset(header, 0, headerSize);
@@ -152,10 +156,9 @@ WebServer::getPage()
 		// if it is not a public page, verify user based on ip address
 		// if the user is verified, serve page, otherwise give error 403 : forbidden
 		if(isPublic(fileName))
-//		if(!strcmp(fileName, "home.html") || !strcmp(fileName, "user.html") || !strcmp(fileName, "black_jack.html") || !strcmp(fileName, "about.html"))
 		{
 			// get page
-			fileIO.getFileContent(fileName, buffer);
+			buffer.assign(fileIO.getFileContent(fileName));
 		}
 		else
 		{
@@ -163,7 +166,7 @@ WebServer::getPage()
 			{
 				if(loggedInUsers[i].getIp() == clientSocket.getIpAddress())
 				{
-					fileIO.getFileContent(fileName, buffer);
+					buffer.assign(fileIO.getFileContent(fileName));
 					free(fileName);
 					return;
 				}
@@ -198,7 +201,8 @@ WebServer::processParam()
 	try
 	{
 		// default return message
-		snprintf(buffer, 3, "%s", OK_CODE);
+		buffer.assign(OK_CODE);
+//		snprintf(buffer, 3, "%s", OK_CODE);
 		
 		// get params
 		if(getKeyAndValue() < 0)
@@ -224,7 +228,7 @@ WebServer::processParam()
 				throw "Not enough parameters for login command.";
 			}
 			const char * response = login(param.values[0], param.values[1], param.values[2], clientSocket.getIpAddress());
-			if(response != OK_CODE)
+			if(strcmp(response, OK_CODE))
 			{
 				throw response;
 			}
@@ -246,14 +250,7 @@ WebServer::processParam()
 			{
 				throw "Not enough parameters for loggedIn command.";
 			}
-			if(verifyUser(param.values[0], clientSocket.getIpAddress()))
-			{
-				snprintf(buffer, 2, "%d", 1);
-			}
-			else
-			{
-				snprintf(buffer, 2, "%d", 0);
-			}
+			buffer.assign(std::to_string(verifyUser(param.values[0], clientSocket.getIpAddress())));
 		}
 		else if(strncmp(receiveBuffer, "POST /getName", 13) == 0)
 		{
@@ -263,7 +260,31 @@ WebServer::processParam()
 				{
 					if(loggedInUsers[i].getToken() == param.values[0])
 					{
-						sprintf(buffer, "%s", &loggedInUsers[i].getName()[0]);
+						buffer.assign(loggedInUsers[i].getName());
+						return;
+					}
+				}
+			}
+			throw "no user logged in with this ip or token.";
+		}
+		else if(strncmp(receiveBuffer, "POST /getBalance", 16) == 0)
+		{
+			for(unsigned int i = 0; i < loggedInUsers.size(); ++i)
+			{
+				if(loggedInUsers[i].getIp() == clientSocket.getIpAddress())
+				{
+					if(loggedInUsers[i].getToken() == param.values[0])
+					{
+						time_t timeOut = time(NULL) + 5; // 5 second timeout time
+						while(!loggedInUsers[i].isReady)
+						{
+							if(time(NULL) >= timeOut)
+							{
+								break;
+							}
+							SLEEP(0.5);
+						}
+						buffer.assign(std::to_string(loggedInUsers[i].getBalance()));
 						return;
 					}
 				}
@@ -296,52 +317,50 @@ WebServer::processParam()
 				if(games[i]->name == "Black Jack")
 				{
 					// check if a user wants to join, and if they do verify their ip and token
-					if(!strcmp(param.keys[0], "join"))
+					for(unsigned int i = 0; i < loggedInUsers.size(); ++i)
 					{
-						if(games[i]->isRunning())
-							throw "GAME_ALREADY_IN_PROGRESS";
-						
-						for(unsigned int i = 0; i < loggedInUsers.size(); ++i)
+						// first verify ip address
+						if(loggedInUsers[i].getIp() == clientSocket.getIpAddress())
 						{
-							// first verify ip address
-							if(loggedInUsers[i].getIp() == clientSocket.getIpAddress())
+							// then verify their token
+							if(loggedInUsers[i].getToken() == param.values[0])
 							{
-								// then verify their token
-								if(loggedInUsers[i].getToken() == param.values[0])
+								if(!strcmp(param.keys[0], "join"))
 								{
-									// only if both the ip and the token have been verified, add user to game if it isn't at max users yet
-									if(games[i]->currentUsers < games[i]->maxUsers)
+									if(games[i]->isRunning())
+										throw "GAME_ALREADY_IN_PROGRESS";
+									if(games[i]->currentUsers >= games[i]->maxUsers)
+										throw "MAX_USERS_REACHED";
+									
+									// check if user isn't already added to game
+									if(games[i]->currentUsers > 1)
 									{
-										// check if user isn't already added to game
-										if(games[i]->users.size() > 1)
+										for(unsigned int i = 0; i < games[i]->currentUsers; ++i)
 										{
-											for(unsigned int i = 0; i < games[i]->users.size(); ++i)
+											if(loggedInUsers[i].getID() == games[i]->users[i]->getID())
 											{
-												if(loggedInUsers[i].getId() == games[i]->users[i].getId())
-												{
-													throw "USER_ALREADY_ADDED_TO_GAME";
-												}
+												throw "USER_ALREADY_ADDED_TO_GAME";
 											}
 										}
-										games[i]->users.push_back(loggedInUsers[i]);
-										games[i]->currentUsers += 1;
-										return;
 									}
-									else
-									{
-										throw "MAX_USERS_REACHED";
-									}
+									void * blackjackUser = new BlackjackUser(&loggedInUsers[i]);
+									games[i]->addUser(blackjackUser);
+									games[i]->currentUsers += 1;
 								}
+								else
+								{
+									// return game output according to input
+									buffer.assign(games[i]->input(param));
+								}
+								return;
+							}
+							else
+							{
+								throw "INVALID_TOKEN";
 							}
 						}
-						throw "USER_NOT_FOUND";
 					}
-					else
-					{
-						// return game output according to input
-						sprintf(buffer, "%s", &games[i]->input(param)[0]);
-						return;
-					}
+					throw "USER_IP_NOT_FOUND";
 				}
 			}
 			throw "GAME_NOT_FOUND";
@@ -349,8 +368,11 @@ WebServer::processParam()
 	}
 	catch(const char * exception)
 	{
-		sprintf(buffer, "Error : %s", exception);
-		printf("Exception : %s\n", exception);
+		buffer.assign("Error : ");
+		buffer.append(exception);
+		
+//		sprintf(&buffer[0], "Error : %s", exception);
+//		printf("Exception : %s\n", exception);
 		return;
 	}
 }
@@ -385,6 +407,14 @@ WebServer::login(std::string token, std::string username, std::string password, 
 {
 	if(loggedInUsers.size() >= maxUsers)
 	{
+		for(User & user : loggedInUsers)
+		{
+			if(!strcmp(&user.getUsername()[0], &username[0]) && !(strcmp(&user.getPassword()[0], &password[0])))
+			{
+				user.login(token, ip);
+				return "OK";
+			}
+		}
 		return "server is full";
 	}
 	
@@ -393,7 +423,7 @@ WebServer::login(std::string token, std::string username, std::string password, 
 	std::string q3 = "SELECT name FROM Players WHERE username = '" + username + "';";
 	
 	printf("selected = %d\n", selectedDatabase);
-	
+
 	if(!strcmp(&databases[selectedDatabase]->select(q1)[0], &password[0]))
 	{
 		loggedInUsers.push_back(User(loggedInUsers.size(), databases[selectedDatabase]->select(q3), username, password, (atoi(&databases[selectedDatabase]->select(q2)[0]) == 1 ? true : false)));

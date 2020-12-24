@@ -1,5 +1,5 @@
 #include "file_io.h"
-
+/*
 int 
 FileIO::getFileSize(const char * file)
 {
@@ -33,9 +33,9 @@ FileIO::getFileSize(const char * file)
 	
 	return -1;
 }
-
-void
-FileIO::getFileContent(const char * file, char * output)
+*/
+std::string
+FileIO::getFileContent(const char * file)
 {	
 	try
 	{
@@ -45,23 +45,26 @@ FileIO::getFileContent(const char * file, char * output)
 			throw "Could not open file.";
 		}
 		
-		int i = 0;
-		char c;
-		while ((c = fgetc(FP)) != EOF)
+		std::string output = "";
+		while(!feof(FP))
 		{
-				*(output + i) = c;
-				i += 1;
+			output += fgetc(FP);
 		}
 		if (feof(FP))
 		{
-			//*(output + i) = c;
+			// remove EOF
+			output.pop_back();
 			fclose(FP);
-			return;
 		}
-		throw "File error.";
+		else
+		{
+			throw "File error.";
+		}
+		return output;
 	}
 	catch(const char * exception)
 	{
 		printf("Exception : %s\n", exception);
 	}
+	return NULL;
 }

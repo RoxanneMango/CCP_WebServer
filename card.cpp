@@ -53,7 +53,7 @@ Card::Card(Picture picture, Suit suit)
 		else
 		{
 			this->picture = picture;
-			this->value = 10;
+			this->value = (picture == Picture::ACE) ? 11 : 10;
 		}
 		
 		if(suit < 0)
