@@ -34,6 +34,8 @@ public:
 
 	double getBalance();
 	void setBalance(double balance);
+	void addBalance(double balance);
+	void subtractBalance(double balance);
 	
 	std::string getCurrency();
 	void setCurrency(std::string currency);

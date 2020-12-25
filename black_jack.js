@@ -62,6 +62,7 @@ async function init()
 			handD.style.display = "block";
 			await getBalance();
 			await getHands();
+			await getSettlement();
 			let p = await getPhase();
 			if(p == 2)
 				insuranceD.style.display = "block";

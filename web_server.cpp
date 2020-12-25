@@ -282,7 +282,7 @@ WebServer::processParam()
 							{
 								break;
 							}
-							SLEEP(0.5);
+							SLEEP(0.1);
 						}
 						buffer.assign(std::to_string(loggedInUsers[i].getBalance()));
 						return;
@@ -312,47 +312,55 @@ WebServer::processParam()
 			param.values.push_back(ip_value);
 
 			// first check for existence of blackjack game in the list of games
-			for(unsigned int i = 0; i < games.size(); ++i)
+			for(Game * game : games)
 			{
-				if(games[i]->name == "Black Jack")
+				if(game->name == "Black Jack")
 				{
 					// check if a user wants to join, and if they do verify their ip and token
-					for(unsigned int i = 0; i < loggedInUsers.size(); ++i)
+					for(User & loggedInUser : loggedInUsers)
 					{
 						// first verify ip address
-						if(loggedInUsers[i].getIp() == clientSocket.getIpAddress())
+						if(loggedInUser.getIp() == clientSocket.getIpAddress())
 						{
 							// then verify their token
-							if(loggedInUsers[i].getToken() == param.values[0])
+							if(loggedInUser.getToken() == param.values[0])
 							{
 								if(!strcmp(param.keys[0], "join"))
 								{
-									if(games[i]->isRunning())
+									if(game->isRunning())
 										throw "GAME_ALREADY_IN_PROGRESS";
-									if(games[i]->currentUsers >= games[i]->maxUsers)
+									if(game->currentUsers >= game->maxUsers)
 										throw "MAX_USERS_REACHED";
 									
 									// check if user isn't already added to game
-									if(games[i]->currentUsers > 1)
+									if(game->currentUsers)
 									{
-										for(unsigned int i = 0; i < games[i]->currentUsers; ++i)
+										for(User * user : game->users)
 										{
-											if(loggedInUsers[i].getID() == games[i]->users[i]->getID())
+											if(loggedInUser.getID() == user->getID())
 											{
 												throw "USER_ALREADY_ADDED_TO_GAME";
 											}
 										}
 									}
-									void * blackjackUser = new BlackjackUser(&loggedInUsers[i]);
-									games[i]->addUser(blackjackUser);
-									games[i]->currentUsers += 1;
+									void * blackjackUser = new BlackjackUser(&loggedInUser);
+									game->addUser(blackjackUser);
+									game->users.push_back(&loggedInUser);
+									game->currentUsers += 1;									
+									return;
+								}
+								else if(game->currentUsers)
+								{
+									if(loggedInUser.getID() == game->users[0]->getID())
+									{
+										buffer.assign(game->input(param));
+										return;
+									}
 								}
 								else
 								{
-									// return game output according to input
-									buffer.assign(games[i]->input(param));
+									throw "USER_NOT_REGISTERED_FOR_GAME";
 								}
-								return;
 							}
 							else
 							{

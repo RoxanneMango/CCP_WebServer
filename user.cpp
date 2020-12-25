@@ -54,6 +54,17 @@ User::setBalance(double balance)
 	this->balance = balance;
 }
 
+void
+User::addBalance(double balance)
+{
+	this->balance += balance;
+}
+void
+User::subtractBalance(double balance)
+{
+	this->balance -= balance;
+}
+
 std::string
 User::getCurrency()
 {
