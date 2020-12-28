@@ -18,7 +18,7 @@ public:
 	unsigned int currentUsers;
 	unsigned int maxUsers;
 	
-	std::vector<User *> users;
+	std::vector<void *> users;
 
 	Game(int id) : id(id)
 	{}

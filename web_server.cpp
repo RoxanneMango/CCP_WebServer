@@ -335,9 +335,9 @@ WebServer::processParam()
 									// check if user isn't already added to game
 									if(game->currentUsers)
 									{
-										for(User * user : game->users)
+										for(void * user : game->users)
 										{
-											if(loggedInUser.getID() == user->getID())
+											if(loggedInUser.getID() == ((User *)user)->getID())
 											{
 												throw "USER_ALREADY_ADDED_TO_GAME";
 											}
@@ -345,13 +345,12 @@ WebServer::processParam()
 									}
 									void * blackjackUser = new BlackjackUser(&loggedInUser);
 									game->addUser(blackjackUser);
-									game->users.push_back(&loggedInUser);
 									game->currentUsers += 1;									
 									return;
 								}
 								else if(game->currentUsers)
 								{
-									if(loggedInUser.getID() == game->users[0]->getID())
+									if(loggedInUser.getID() == ((User *)(game->users[0]))->getID())
 									{
 										buffer.assign(game->input(param));
 										return;

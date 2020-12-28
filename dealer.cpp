@@ -1,6 +1,7 @@
 #include "dealer.h"
 
-Dealer::Dealer(std::vector<DeckOfCards> * cards, unsigned int * numOfDecks) : cards(cards), numOfDecks(numOfDecks)
+Dealer::Dealer(std::vector<DeckOfCards> * cards, unsigned int * numOfDecks) : 
+	BlackjackUser(-1, "Dealer"), cards(cards), numOfDecks(numOfDecks)
 {}
 Dealer::~Dealer()
 {}
@@ -36,18 +37,14 @@ Dealer::shuffle()
 }
 
 void
-Dealer::deal(std::vector<BlackjackUser *> * users)
+Dealer::deal(std::vector<void *> * users)
 {
-	for(BlackjackUser * user : *users)
+	for(void * user : *users)
 	{
-		dealCard(user, 0);
-		dealCard(user, 0);
+		dealCard((BlackjackUser *)user, 0);
+		dealCard((BlackjackUser *)user, 0);
 	}
-
-	dealCard();
-	dealCard();
-
-	hand[1].hide();
+	hand[0][1].hide();
 }
 
 void
@@ -71,6 +68,7 @@ Dealer::dealCard(BlackjackUser * user, int handIndex)
 	user->hand[handIndex].push_back((*cards)[index].getCard());
 }
 
+/*
 void
 Dealer::dealCard()
 {
@@ -78,9 +76,10 @@ Dealer::dealCard()
 	int index = rand() % ((*numOfDecks)-1);
 	hand.push_back((*cards)[index].getCard());
 }
+*/
 
 void
 Dealer::revealCard()
 {
-	hand[1].expose();	
+	hand[0][1].expose();	
 }

@@ -4,7 +4,7 @@
 #include "blackjack_user.h"
 #include "deck_of_cards.h"
 
-class Dealer
+class Dealer : public BlackjackUser
 {
 private:
 	std::vector<DeckOfCards> * cards;
@@ -13,12 +13,9 @@ public:
 	Dealer(std::vector<DeckOfCards> * cards, unsigned int * numOfDecks);
 	~Dealer();
 
-	std::vector<Card> hand;
-	
 	void shuffle();
-	void deal(std::vector<BlackjackUser *> * users);
+	void deal(std::vector<void *> * users);
 	void split(BlackjackUser * user);
-	void dealCard();
 	void dealCard(BlackjackUser * user, int handIndex);
 	void revealCard();
 };

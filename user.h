@@ -6,7 +6,7 @@
 
 class User
 {
-private:
+protected:
 	int id;
 	
 	std::string ip;
@@ -30,7 +30,7 @@ private:
 public:
 	User(int id, std::string name);
 	User(int id, std::string name, std::string username, std::string password, bool superUser = false);
-	~User();
+	virtual ~User();
 
 	double getBalance();
 	void setBalance(double balance);

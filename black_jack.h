@@ -113,7 +113,6 @@ private:
 	std::vector<DeckOfCards> cardDecks;
 	
 	Dealer dealer;
-	std::vector<BlackjackUser *> blackjackUsers;
 	
 	std::vector<double> bets;
 

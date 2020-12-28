@@ -12,16 +12,19 @@ class BlackjackUser : public User
 private:
 public:
 	BlackjackUser(User * user);
-	BlackjackUser(User user);
-	~BlackjackUser();
+//	BlackjackUser(User & user);
+//	BlackjackUser(User user);
+	BlackjackUser(int id, std::string name);
+	virtual ~BlackjackUser() override;
 
 	User * userHandle;	
 
 	std::vector<Chip> chips;
 	std::vector<Card> hand[2];
 
-	double bettingAmount;
-	double insuranceAmount;
+	double bettingAmount = 0;
+	double insuranceAmount = 0;
+	
 	//
 	void addChips(BlackjackUser & user, Chip chip);
 	void removeChips(BlackjackUser & user, Chip chip);
