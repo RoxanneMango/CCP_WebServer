@@ -11,19 +11,7 @@ BlackJack::BlackJack(int id, unsigned int numOfDecks) :
 	maxBettingAmount = 4000;
 }
 BlackJack::~BlackJack()
-{
-	// we look for this optimal point where there is a risk—there must be a risk, 
-	// there must be chance, it mustn’t all be predetermined—because any game where 
-	// the result is known is not worth playing
-	//
-	// life really is not the avoidance of death. Death is the avoidance of death. 
-	// The constant terror of death, the constant putting it off, the constant vigilance 
-	// that one will not die—that is death! What we call life is, fundamentally, willingness to die.
-	// ~ Alan Watts
-	
-	// “The body’s judgment is as good as the mind’s, and the body shrinks from annihilation. 
-	// We get into the habit of living before acquiring the habit of thinking.”
-}
+{}
 
 Card
 BlackJack::getCard()
