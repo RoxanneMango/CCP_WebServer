@@ -3,11 +3,11 @@
 
 #include <vector>
 
-#include "server.h"
-#include "socket.h"
-
 #include <unistd.h>
 #include <time.h>
+
+#include "server.h"
+#include "socket.h"
 
 class Column
 {

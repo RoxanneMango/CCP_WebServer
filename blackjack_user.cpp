@@ -1,20 +1,13 @@
 #include "blackjack_user.h"
 
-//BlackjackUser::BlackjackUser(User & user) : User(user)
-//{}
-BlackjackUser::BlackjackUser(User * user) : User(*user), userHandle(user)
+BlackjackUser::BlackjackUser(User & user) : User(user)
 {}
 
 BlackjackUser::BlackjackUser(int id, std::string name) : User(id, name)
 {}
 
-//BlackjackUser::BlackjackUser(User user) : User(user), userHandle(NULL)
-//{}
 BlackjackUser::~BlackjackUser()
-{
-	if(userHandle != NULL)
-		delete this;
-}
+{}
 
 void
 BlackjackUser::addChips(BlackjackUser & user, Chip chip)

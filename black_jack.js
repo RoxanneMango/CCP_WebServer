@@ -38,14 +38,6 @@ async function init()
 			await getSettlement();
 		}
 	}
-/*	
-	window.addEventListener("beforeunload", function(event) {
-		if(p == 5)
-		{
-			post({"stop":token});
-		}
-	}, true);
-*/	
 	document.getElementById("blackjackStartButton").addEventListener("click", async function() 
 	{		
 		await post({"join":token}); 
@@ -163,10 +155,13 @@ async function init()
 			stopD.style.display = "block";
 		}
 	}, false);
+	document.getElementById("blackjackRetryButton").addEventListener("click", async function()
+	{
+		location.reload();
+	}, false);
 	document.getElementById("blackjackStopButton").addEventListener("click", async function()
 	{
 		await post({"stop":token});
-		location.reload();
 	}, false);
 	document.getElementById("blackjackSplitButtonYes").addEventListener("click", async function()
 	{
@@ -406,6 +401,7 @@ async function getSettlement()
 			if(x >= 0)
 			{
 				await processResults(x);
+				await post({"stop":sessionStorage.getItem('token')});
 			}
 		}
 	).catch(error => console.log(error));

@@ -40,10 +40,9 @@ WebServer::writeSocket()
 	int size = strlen(RESPONSE) + strlen(header) + buffer.size() + 1;
 	char * x = (char *) calloc(size, sizeof(char));
 	snprintf(x, size, "%s%s%s", RESPONSE, header, &buffer[0]);
-//	snprintf(tranceiveBuffer, strlen(RESPONSE) + strlen(header) + buffer.size() + 1, "%s%s%s", RESPONSE, header, &buffer[0]);
 	clientSocket.writeSocket(x, strlen(x));
-//	clientSocket.writeSocket(tranceiveBuffer, strlen(tranceiveBuffer));
 	clearBuffers();
+	free(x);
 }
 
 void
@@ -164,7 +163,7 @@ WebServer::getPage()
 		{
 			for(unsigned int i = 0; i < loggedInUsers.size(); ++i)
 			{
-				if(loggedInUsers[i].getIp() == clientSocket.getIpAddress())
+				if(loggedInUsers[i]->getIp() == clientSocket.getIpAddress())
 				{
 					buffer.assign(fileIO.getFileContent(fileName));
 					free(fileName);
@@ -202,7 +201,6 @@ WebServer::processParam()
 	{
 		// default return message
 		buffer.assign(OK_CODE);
-//		snprintf(buffer, 3, "%s", OK_CODE);
 		
 		// get params
 		if(getKeyAndValue() < 0)
@@ -256,11 +254,11 @@ WebServer::processParam()
 		{
 			for(unsigned int i = 0; i < loggedInUsers.size(); ++i)
 			{
-				if(loggedInUsers[i].getIp() == clientSocket.getIpAddress())
+				if(loggedInUsers[i]->getIp() == clientSocket.getIpAddress())
 				{
-					if(loggedInUsers[i].getToken() == param.values[0])
+					if(loggedInUsers[i]->getToken() == param.values[0])
 					{
-						buffer.assign(loggedInUsers[i].getName());
+						buffer.assign(loggedInUsers[i]->getName());
 						return;
 					}
 				}
@@ -271,12 +269,12 @@ WebServer::processParam()
 		{
 			for(unsigned int i = 0; i < loggedInUsers.size(); ++i)
 			{
-				if(loggedInUsers[i].getIp() == clientSocket.getIpAddress())
+				if(loggedInUsers[i]->getIp() == clientSocket.getIpAddress())
 				{
-					if(loggedInUsers[i].getToken() == param.values[0])
+					if(loggedInUsers[i]->getToken() == param.values[0])
 					{
 						time_t timeOut = time(NULL) + 5; // 5 second timeout time
-						while(!loggedInUsers[i].isReady)
+						while(!loggedInUsers[i]->isReady)
 						{
 							if(time(NULL) >= timeOut)
 							{
@@ -284,7 +282,7 @@ WebServer::processParam()
 							}
 							SLEEP(0.1);
 						}
-						buffer.assign(std::to_string(loggedInUsers[i].getBalance()));
+						buffer.assign(std::to_string(loggedInUsers[i]->getBalance()));
 						return;
 					}
 				}
@@ -317,13 +315,13 @@ WebServer::processParam()
 				if(game->name == "Black Jack")
 				{
 					// check if a user wants to join, and if they do verify their ip and token
-					for(User & loggedInUser : loggedInUsers)
+					for(User * & loggedInUser : loggedInUsers)
 					{
 						// first verify ip address
-						if(loggedInUser.getIp() == clientSocket.getIpAddress())
+						if(loggedInUser->getIp() == clientSocket.getIpAddress())
 						{
 							// then verify their token
-							if(loggedInUser.getToken() == param.values[0])
+							if(loggedInUser->getToken() == param.values[0])
 							{
 								if(!strcmp(param.keys[0], "join"))
 								{
@@ -337,20 +335,19 @@ WebServer::processParam()
 									{
 										for(void * user : game->users)
 										{
-											if(loggedInUser.getID() == ((User *)user)->getID())
+											if(loggedInUser->getID() == ((User *)user)->getID())
 											{
 												throw "USER_ALREADY_ADDED_TO_GAME";
 											}
 										}
 									}
-									void * blackjackUser = new BlackjackUser(&loggedInUser);
-									game->addUser(blackjackUser);
-									game->currentUsers += 1;									
+									loggedInUser = game->addUser(loggedInUser);
+									game->currentUsers += 1;
 									return;
 								}
 								else if(game->currentUsers)
 								{
-									if(loggedInUser.getID() == ((User *)(game->users[0]))->getID())
+									if(loggedInUser->getID() == ((User *)(game->users[0]))->getID())
 									{
 										buffer.assign(game->input(param));
 										return;
@@ -367,7 +364,7 @@ WebServer::processParam()
 							}
 						}
 					}
-					throw "USER_IP_NOT_FOUND";
+					throw "USER_NOT_FOUND";
 				}
 			}
 			throw "GAME_NOT_FOUND";
@@ -414,11 +411,11 @@ WebServer::login(std::string token, std::string username, std::string password, 
 {
 	if(loggedInUsers.size() >= maxUsers)
 	{
-		for(User & user : loggedInUsers)
+		for(User * user : loggedInUsers)
 		{
-			if(!strcmp(&user.getUsername()[0], &username[0]) && !(strcmp(&user.getPassword()[0], &password[0])))
+			if(!strcmp(&user->getUsername()[0], &username[0]) && !(strcmp(&user->getPassword()[0], &password[0])))
 			{
-				user.login(token, ip);
+				user->login(token, ip);
 				return "OK";
 			}
 		}
@@ -433,8 +430,8 @@ WebServer::login(std::string token, std::string username, std::string password, 
 
 	if(!strcmp(&databases[selectedDatabase]->select(q1)[0], &password[0]))
 	{
-		loggedInUsers.push_back(User(loggedInUsers.size(), databases[selectedDatabase]->select(q3), username, password, (atoi(&databases[selectedDatabase]->select(q2)[0]) == 1 ? true : false)));
-		loggedInUsers[loggedInUsers.size()-1].login(token, ip);
+		loggedInUsers.push_back(new User(loggedInUsers.size(), databases[selectedDatabase]->select(q3), username, password, (atoi(&databases[selectedDatabase]->select(q2)[0]) == 1 ? true : false)));
+		loggedInUsers[loggedInUsers.size()-1]->login(token, ip);
 		return "OK";
 	}
 	return "could not match username to password";
@@ -476,9 +473,10 @@ WebServer::logout(std::string token, std::string ip)
 {
 	for(unsigned int i = 0; i < loggedInUsers.size(); ++i)
 	{
-		if( (loggedInUsers[i].getToken() == token) && (loggedInUsers[i].getIp() == ip) )
+		if( (loggedInUsers[i]->getToken() == token) && (loggedInUsers[i]->getIp() == ip) )
 		{
-			loggedInUsers[i].logout();
+			loggedInUsers[i]->logout();
+			delete loggedInUsers[i];
 			loggedInUsers.erase(loggedInUsers.begin() + i);
 			break;
 		}
@@ -492,7 +490,7 @@ WebServer::verifyUser(std::string token, std::string ip)
 {
 	for(unsigned int i = 0; i < loggedInUsers.size(); ++i)
 	{
-		if( (loggedInUsers[i].getToken() == token) && (loggedInUsers[i].getIp() == ip) )
+		if( (loggedInUsers[i]->getToken() == token) && (loggedInUsers[i]->getIp() == ip) )
 		{
 			return true;
 		}

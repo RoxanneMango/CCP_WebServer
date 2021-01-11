@@ -84,6 +84,33 @@
 * 
 \* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
+
+/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
+* TODO
+*
+* 1.	Iterate over EXISTING database
+* 2.	Fill in more database fields, such as BJ games lost and won, tied, etc
+* 3.	Create API to ask user information from database
+* 4.	Create API to let a user modify certain information such as display name and password
+* 5.	Be able to email a user
+* 6.	Add Encryption interface class
+* 7.	Add Ceasar Cypher / hash Encryption class implementations
+* 8.	Keep using same instance of decks of cards until they run out, only then reshuffle them
+* 9.	Remove unnecesary comments
+* 10.	Add meaningful comments
+* 11.	Add save function
+* 12.	Solve the stop() problem for the blackjack game; when to do it? timer?
+* 13.	Change buffers to vector<char> or something similar for variable length
+* 14.	Create isPlayingGame flag for User to prevent them from joining more than one game
+* 15.	Move flags such as canSplit to the BlackjackUser class
+* 16.	Check out rule of 5
+* 17.	Figure out how to send images via the WebServer. uint8_t byte array?
+* 18.	Test all the SETTLEMENT outcomes; whether they are handled correctly
+* 19.	
+*
+* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
+
 class BlackJack : public Game
 {
 private:	
@@ -112,7 +139,7 @@ private:
 	unsigned int numOfDecks;
 	std::vector<DeckOfCards> cardDecks;
 	
-	Dealer dealer;
+	Dealer * dealer;
 	
 	std::vector<double> bets;
 
@@ -136,7 +163,7 @@ private:
 	Card getCard();
 	std::string getHands();
 	int getSettlement();
-	
+
 public:
 	BlackJack(int id, unsigned int numOfDecks);
 	~BlackJack();
@@ -149,7 +176,7 @@ public:
 	
 	bool isRunning();
 	
-	void addUser(void * user) override;
+	User * addUser(User * user) override;
 };
 
 #endif // BLACK_JACK_H

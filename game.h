@@ -23,9 +23,10 @@ public:
 	Game(int id) : id(id)
 	{}
 
-	virtual void addUser(void * user)
+	virtual User * addUser(User * user)
 	{
-		users.push_back((User *)user);
+		users.push_back(user);
+		return user;
 	}
 
 	virtual std::string input(Param param) = 0;

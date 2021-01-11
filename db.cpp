@@ -18,20 +18,15 @@ main(int argc, char ** argv)
 	Socket		 		connectionSocket;
 	DatabaseServer		database(id, listenSocket, connectionSocket, bufferSize);
 		
-	const char * loadFile = (argc == 2) ? argv[1] : "database.db";
-	const char * saveFile = (argc == 3) ? argv[2] : "database_save.db";
+//	const char * loadFile = (argc == 2) ? argv[1] : "database.db";
+	const char * saveFile = (argc == 3) ? argv[2] : "database.db";
 	//
-	printf("load file: %s\n", loadFile);
+//	printf("load file: %s\n", loadFile);
 	printf("save file: %s\n", saveFile);
 	//
-	if(database.load(loadFile) < 0)
+	if(database.load(saveFile) < 0)
 	{
 		printf("Could not load from file.");
-		return -1;
-	}
-	if(database.save(saveFile) < 0)
-	{
-		printf("Could not save to file.");
 		return -1;
 	}
 	

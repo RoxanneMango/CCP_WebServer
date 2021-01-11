@@ -38,7 +38,7 @@ class WebServer : public Server
 	unsigned int maxPasswordLength = 32;
 
 	unsigned int maxUsers = 5;
-	std::vector<User> loggedInUsers;
+	std::vector<User *> loggedInUsers;
 
 	std::vector<User> userBase;
 	

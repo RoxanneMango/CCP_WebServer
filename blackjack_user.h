@@ -11,11 +11,10 @@ class BlackjackUser : public User
 {
 private:
 public:
-	BlackjackUser(User * user);
-//	BlackjackUser(User & user);
-//	BlackjackUser(User user);
+	BlackjackUser(User & user);
 	BlackjackUser(int id, std::string name);
-	virtual ~BlackjackUser() override;
+	
+	virtual ~BlackjackUser();
 
 	User * userHandle;	
 

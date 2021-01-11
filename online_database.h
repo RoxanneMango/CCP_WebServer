@@ -2,6 +2,7 @@
 #define ONLINE_DATABASE_H
 
 #include <string.h>
+#include <thread>
 
 #include "database.h"
 #include "socket.h"
