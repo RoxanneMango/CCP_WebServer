@@ -7,6 +7,9 @@ CFLAGS = -Wall -static -O3
 CXXFLAGS = -Wall -std=c++0x -static -O3
 LIBS = -Wl,--whole-archive -lpthread -Wl,--no-whole-archive
 
+SRC = 
+OUTPUT = build/
+
 OBJECTS = server.o database_server.o
 EXEC = db
 
@@ -22,14 +25,17 @@ endif
 
 .PHONY: all clean run db
 
-all: $(OBJECTS)
-	$(CXX) -o $(EXEC) db.cpp $(OBJECTS) $(CXXFLAGS) $(LIBS)
+all: $(OBJECTS) $(OUTPUT)
+	$(CXX) -o $(OUTPUT)/$(EXEC) ./database/db.cpp $(OBJECTS) $(CXXFLAGS) $(LIBS)
 
 $(OBJECTS): %.o: %.cpp
-	$(CXX) -c $(CXXFLAGS) $(LIBS) $< -o $@
+	$(CXX) -c $(CXXFLAGS) $(LIBS) $< -o $(OUTPUT)
 
 clean:
-	@$(DELETE) $(EXEC)
+	@$(DELETE) $(OUTPUT)/$(EXEC)
 
 run:
-	@./$(EXEC)
+	@$(OUTPUT)/$(EXEC)
+
+$(OUTPUT):
+	mkdir $(OUTPUT)

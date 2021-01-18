@@ -693,7 +693,7 @@ BlackJack::input(Param param)
 		if(strcmp(param.keys[0], "getsettlement") == 0)
 		{
 
-			time_t timeOut = time(0) + 5; // 1 second timeout time
+			time_t timeOut = time(0) + 5; // 5 second timeout time
 			while( (!isReady) )
 			{
 				if(time(0) >= timeOut)
@@ -710,7 +710,7 @@ BlackJack::input(Param param)
 		}
 		if(strcmp(param.keys[0], "getbettingamount") == 0)
 		{
-			time_t timeOut = time(0) + 5; // .5 second timeout time
+			time_t timeOut = time(0) + 5; // 5 second timeout time
 			while( (!isReady) )
 			{
 				if(time(0) >= timeOut)
@@ -727,7 +727,7 @@ BlackJack::input(Param param)
 		}
 		if(strcmp(param.keys[0], "getinsuranceamount") == 0)
 		{
-			time_t timeOut = time(0) + 5; // .5 second timeout time
+			time_t timeOut = time(0) + 5; // 5 second timeout time
 			while( (!isReady) )
 			{
 				if(time(0) >= timeOut)
@@ -746,7 +746,7 @@ BlackJack::input(Param param)
 		{
 			if(!running)
 				return "-1";
-			time_t timeOut = time(0) + 5; // .5 second timeout time
+			time_t timeOut = time(0) + 5; // 5 second timeout time
 			while( (!isReady) )
 			{
 				if(time(0) >= timeOut)

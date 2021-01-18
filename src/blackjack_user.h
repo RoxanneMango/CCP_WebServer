@@ -16,7 +16,7 @@ public:
 	
 	virtual ~BlackjackUser();
 
-	User * userHandle;	
+//	User * userHandle;	
 
 	std::vector<Chip> chips;
 	std::vector<Card> hand[2];

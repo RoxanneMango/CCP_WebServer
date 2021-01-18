@@ -1,7 +1,7 @@
-#include "socket.h"
-#include "sleep.h"
-#include "thread.h"
-#include "database_server.h"
+#include "../socket.h"
+#include "../sleep.h"
+#include "../thread.h"
+#include "../database_server.h"
 
 void saveTimer(DatabaseServer & db, const char * saveFile);
 
@@ -19,7 +19,7 @@ main(int argc, char ** argv)
 	DatabaseServer		database(id, listenSocket, connectionSocket, bufferSize);
 		
 //	const char * loadFile = (argc == 2) ? argv[1] : "database.db";
-	const char * saveFile = (argc == 3) ? argv[2] : "database.db";
+	const char * saveFile = (argc == 3) ? argv[2] : "save/database.db";
 	//
 //	printf("load file: %s\n", loadFile);
 	printf("save file: %s\n", saveFile);
@@ -30,7 +30,23 @@ main(int argc, char ** argv)
 		return -1;
 	}
 	
-	std::thread autoSave(saveTimer, std::ref(database), saveFile);
+	std::thread thread;
+	
+	try
+	{
+		if(thread.joinable())
+		{
+			thread.detach();
+		}
+		thread = std::thread(&saveTimer, std::ref(database), saveFile);
+	}
+	catch(std::exception const & exception)
+	{
+		printf("Exception: %s\n", exception.what());
+		return -1;
+	}
+	
+//	std::thread autoSave(saveTimer, std::ref(database), saveFile);
 	
 	printf("db listening on %s:%d . . .\n", ip, port);
 	for(;;)

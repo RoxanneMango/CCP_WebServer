@@ -1,0 +1,47 @@
+CREATE DATABASE Users
+
+USE Users
+
+CREATE TABLE Players
+(
+	id STRING,
+	superUser STRING,
+	name STRING,
+	username STRING,
+	password STRING,
+	ip STRING,
+	port STRING,
+	token STRING,
+	balance STRING,
+	currency STRING,
+	registrationDate STRING,
+	lastLogin STRING
+);
+INSERT INTO Players
+(
+	id, superUser, name, username, password, ip, port, token, balance, currency, registrationDate, lastLogin
+)
+VALUES
+( 0, 1, 'root', 'root', 'midnightsnack', 'null', 'null', 'null', 20.00, 'Euro', '01:01:1970:00:00:00', 'null' ),
+( 1, 0, 'user', 'username', 'password', 'null', 'null', 'null', 1.00, 'Dollar', '01:01:1970:00:00:00', 'null' ),
+( 2, 0, 'Roxanne', 'roxanne', 'cicadacup', 'null', 'null', 'null', 'null', 'null', '11:01:2021:07:21:20', 'null' ),
+( 3, 0, 'helloworld', 'helloworld', 'helloworld', 'null', 'null', 'null', 'null', 'null', '16:01:2021:10:15:17', 'null' );
+
+CREATE DATABASE Games
+
+USE Games
+
+CREATE TABLE Blackjack
+(
+	userID STRING,
+	gamesPlayed STRING,
+	gamesWon STRING
+);
+INSERT INTO Blackjack
+(
+	userID, gamesPlayed, gamesWon
+)
+VALUES
+( 0, 97, 34 ),
+( 1, 0, 0 );
+

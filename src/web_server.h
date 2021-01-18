@@ -18,6 +18,8 @@ class WebServer : public Server
 	const char * FORBIDDEN_RESPONSE = "HTTP/1.0 403 forbidden\r\n";
 	const char * TP_RESPONSE = "HTTP/1.0 418 I'm a teapot\r\n";
 
+	const char * PREFIX = "view/";
+
 	const char * OK_CODE = "OK";
 	
 	bool hasFavicon = false;

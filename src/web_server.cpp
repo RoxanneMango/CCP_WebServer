@@ -139,6 +139,11 @@ WebServer::getPage()
 
 	strncpy(fileName, (receiveBuffer_ptr - fileNameSize), fileNameSize);
 	
+	
+	char * filePath = (char *) calloc(fileNameSize + strlen(PREFIX) + 1, sizeof(char));
+	strcpy(filePath, PREFIX);
+	strcat(filePath, fileName);
+	
 	// receiveBuffer_ptr is at end of file name; get to the start of 'css' file extension by taking 3 steps back
 	// if file extension is 'css' (cascading style sheet), set content-type to text/css
 	// else, use default settings
@@ -157,7 +162,7 @@ WebServer::getPage()
 		if(isPublic(fileName))
 		{
 			// get page
-			buffer.assign(fileIO.getFileContent(fileName));
+			buffer.assign(fileIO.getFileContent(filePath));
 		}
 		else
 		{
@@ -165,7 +170,7 @@ WebServer::getPage()
 			{
 				if(loggedInUsers[i]->getIp() == clientSocket.getIpAddress())
 				{
-					buffer.assign(fileIO.getFileContent(fileName));
+					buffer.assign(fileIO.getFileContent(filePath));
 					free(fileName);
 					return;
 				}

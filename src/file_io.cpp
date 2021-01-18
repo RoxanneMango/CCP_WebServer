@@ -39,6 +39,9 @@ FileIO::getFileContent(const char * file)
 {	
 	try
 	{
+		
+		printf("filePath: %s\n", file);
+		
 		FILE * FP = fopen(strlen(file) ? file : DEFAULT_FILE, "r");
 		if(FP == nullptr)
 		{
@@ -66,5 +69,5 @@ FileIO::getFileContent(const char * file)
 	{
 		printf("Exception : %s\n", exception);
 	}
-	return NULL;
+	return "COULD_NOT_LOAD_PAGE";
 }
