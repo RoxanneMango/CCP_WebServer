@@ -9,6 +9,7 @@
 #include "blackjack_user.h"
 #include "server.h"
 #include "sleep.h"
+#include "thread.h"
 
 class WebServer : public Server
 {
@@ -39,12 +40,16 @@ class WebServer : public Server
 	unsigned int maxPasswordLength = 32;
 
 	unsigned int maxUsers = 5;
-	std::vector<User *> loggedInUsers;
+	std::vector<User *> users;
 	
 	void clearBuffers();
 	void resizeHeader();
 	
 	bool isPublic(char * fileName);
+	
+	void saveTimer();
+	
+	std::thread saveThread;
 	
 public:
 	WebServer(Socket & serverSocket, Socket & clientSocket, Param & param, const char * viewDir, const char * defaultFile);

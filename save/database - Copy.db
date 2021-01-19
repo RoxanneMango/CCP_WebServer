@@ -23,7 +23,7 @@ INSERT INTO Players
 )
 VALUES
 ( 0, 1, 'root', 'root', 'midnightsnack', 'null', 'null', 'null', 20.00, 'Euro', '01:01:1970:00:00:00', 'null' ),
-( 1, 0, 'user', 'username', 'password', 'null', 'null', 'null', 0.00, 'Dollar', '01:01:1970:00:00:00', 'null' ),
+( 1, 0, 'user', 'username', 'password', 'null', 'null', 'null', 1.00, 'Dollar', '01:01:1970:00:00:00', 'null' ),
 ( 2, 0, 'Roxanne', 'roxanne', 'cicadacup', 'null', 'null', 'null', 'null', 'null', '11:01:2021:07:21:20', 'null' ),
 ( 3, 0, 'helloworld', 'helloworld', 'helloworld', 'null', 'null', 'null', 'null', 'null', '16:01:2021:10:15:17', 'null' );
 

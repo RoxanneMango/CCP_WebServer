@@ -24,64 +24,44 @@ OnlineDatabase::clearBuffers()
 	memset(tranceiveBuffer, 0, bufferSize);
 }
 
-void
-OnlineDatabase::setName(std::string name)
-{
-	this->name = name;
-}
 std::string
-OnlineDatabase::getName()
-{
-	return name;
-}
-
-std::string
-OnlineDatabase::select(std::string query)
+OnlineDatabase::sendQuery(std::string query)
 {
 	clearBuffers();
 	
 	socket.connectSocket();
 	socket.writeSocket(&query[0] , strlen(&query[0])+1);
 	socket.readSocket(receiveBuffer, bufferSize);
-//	printf("receiveBuffer: %s\n", receiveBuffer); fflush(stdout);
 	socket.disconnectSocket();
 
 	return std::string(receiveBuffer);
 }
 
-int
-OnlineDatabase::create(std::string query)
+std::string 
+OnlineDatabase::save(std::vector<User *> & users)
 {
-	return 0;
+	for(User * user : users)
+	{
+		// trim off 4 extra zeroes at end
+		std::string tmp = std::to_string(user->getBalance());
+		std::string balance = tmp.substr(0, tmp.length()-4);
+		
+		std::string q = "UPDATE Players balance = " + balance + "; WHERE username = '" + user->getUsername() + "';";
+		sendQuery(q);
+	}	
+
+	return "SAVED";
 }
-int
-OnlineDatabase::insert(std::string query)
+
+std::string 
+OnlineDatabase::save(User & user)
 {
-	clearBuffers();
+	// trim off 4 extra zeroes at end
+	std::string tmp = std::to_string(user.getBalance());
+	std::string balance = tmp.substr(0, tmp.length()-4);
 	
-	socket.connectSocket();
-	socket.writeSocket(&query[0] , strlen(&query[0])+1);
-	socket.readSocket(receiveBuffer, bufferSize);
-//	printf("receiveBuffer: %s\n", receiveBuffer); fflush(stdout);
-	socket.disconnectSocket();
+	std::string q = "UPDATE Players balance = " + balance + "; WHERE username = '" + user.getUsername() + "';";
+	sendQuery(q);
 	
-	return atoi(receiveBuffer);
-}
-int
-OnlineDatabase::update(std::string query)
-{
-	clearBuffers();
-	
-	socket.connectSocket();
-	socket.writeSocket(&query[0] , strlen(&query[0])+1);
-	socket.readSocket(receiveBuffer, bufferSize);
-//	printf("receiveBuffer: %s\n", receiveBuffer); fflush(stdout);
-	socket.disconnectSocket();
-	
-	return atoi(receiveBuffer);
-}
-int
-OnlineDatabase::drop(std::string query)
-{
-	return 0;
+	return "SAVED";
 }

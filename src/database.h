@@ -3,6 +3,8 @@
 
 #include <string>
 
+#include "user.h"
+
 class Database
 {
 public:
@@ -14,12 +16,9 @@ public:
 	unsigned int id;
 	std::string name;
 
-	virtual std::string select(std::string query) = 0;
-	//
-	virtual int create(std::string query) = 0;
-	virtual int insert(std::string query) = 0;
-	virtual int update(std::string query) = 0;
-	virtual int drop(std::string query) = 0;
+	virtual std::string sendQuery(std::string query) = 0;
+	virtual std::string save(std::vector<User *> & users) = 0;
+	virtual std::string save(User & user) = 0;
 };
 
 #endif // DATABASE_H

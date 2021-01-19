@@ -13,6 +13,22 @@ WebServer::WebServer( Socket & serverSocket, Socket & clientSocket, Param & para
 	
 	RESPONSE = (char *) calloc(64, sizeof(char));
 	strcpy(RESPONSE, "HTTP/1.0 200 OK\r\n");
+	
+	
+	try
+	{
+		if(saveThread.joinable())
+		{
+			saveThread.detach();
+		}
+		saveThread = std::thread(&WebServer::saveTimer, this);
+	}
+	catch(std::exception const & exception)
+	{
+		printf("Exception: %s\n", exception.what());
+		return;
+	}
+	
 }
 
 WebServer::~WebServer()
@@ -20,6 +36,18 @@ WebServer::~WebServer()
 	// free all allocated memory for header
 	free(header);
 	free(RESPONSE);
+}
+
+void
+WebServer::saveTimer()
+{
+	for(;;)
+	{
+		printf("Saving . . .\n");
+		databases[selectedDatabase]->save(users);
+		printf("Save successful.\n");
+		SLEEP(60);
+	}
 }
 
 void
@@ -167,9 +195,9 @@ WebServer::getPage()
 		}
 		else
 		{
-			for(unsigned int i = 0; i < loggedInUsers.size(); ++i)
+			for(unsigned int i = 0; i < users.size(); ++i)
 			{
-				if(loggedInUsers[i]->getIp() == clientSocket.getIpAddress())
+				if(users[i]->getIp() == clientSocket.getIpAddress())
 				{
 					buffer.assign(fileIO.getFileContent(filePath));
 					free(fileName);
@@ -258,13 +286,13 @@ WebServer::processParam()
 		}
 		else if(strncmp(receiveBuffer, "POST /getName", 13) == 0)
 		{
-			for(unsigned int i = 0; i < loggedInUsers.size(); ++i)
+			for(unsigned int i = 0; i < users.size(); ++i)
 			{
-				if(loggedInUsers[i]->getIp() == clientSocket.getIpAddress())
+				if(users[i]->getIp() == clientSocket.getIpAddress())
 				{
-					if(loggedInUsers[i]->getToken() == param.values[0])
+					if(users[i]->getToken() == param.values[0])
 					{
-						buffer.assign(loggedInUsers[i]->getName());
+						buffer.assign(users[i]->getName());
 						return;
 					}
 				}
@@ -273,14 +301,14 @@ WebServer::processParam()
 		}
 		else if(strncmp(receiveBuffer, "POST /getBalance", 16) == 0)
 		{
-			for(unsigned int i = 0; i < loggedInUsers.size(); ++i)
+			for(unsigned int i = 0; i < users.size(); ++i)
 			{
-				if(loggedInUsers[i]->getIp() == clientSocket.getIpAddress())
+				if(users[i]->getIp() == clientSocket.getIpAddress())
 				{
-					if(loggedInUsers[i]->getToken() == param.values[0])
+					if(users[i]->getToken() == param.values[0])
 					{
 						time_t timeOut = time(NULL) + 5; // 5 second timeout time
-						while(!loggedInUsers[i]->isReady)
+						while(!users[i]->isReady)
 						{
 							if(time(NULL) >= timeOut)
 							{
@@ -288,7 +316,7 @@ WebServer::processParam()
 							}
 							SLEEP(0.1);
 						}
-						buffer.assign(std::to_string(loggedInUsers[i]->getBalance()));
+						buffer.assign(std::to_string(users[i]->getBalance()));
 						return;
 					}
 				}
@@ -321,7 +349,7 @@ WebServer::processParam()
 				if(game->name == "Black Jack")
 				{
 					// check if a user wants to join, and if they do verify their ip and token
-					for(User * & loggedInUser : loggedInUsers)
+					for(User * & loggedInUser : users)
 					{
 						// first verify ip address
 						if(loggedInUser->getIp() == clientSocket.getIpAddress())
@@ -415,9 +443,9 @@ WebServer::removeGame(int id)
 const char *
 WebServer::login(std::string token, std::string username, std::string password, std::string ip)
 {
-	if(loggedInUsers.size() >= maxUsers)
+	if(users.size() >= maxUsers)
 	{
-		for(User * user : loggedInUsers)
+		for(User * user : users)
 		{
 			if(!strcmp(&user->getUsername()[0], &username[0]) && !(strcmp(&user->getPassword()[0], &password[0])))
 			{
@@ -431,13 +459,17 @@ WebServer::login(std::string token, std::string username, std::string password, 
 	std::string q1 = "SELECT password FROM Players WHERE username = '" + username + "';";
 	std::string q2 = "SELECT superUser FROM Players WHERE username = '" + username + "';";
 	std::string q3 = "SELECT name FROM Players WHERE username = '" + username + "';";
-	
+	std::string q4 = "SELECT balance FROM Players WHERE username = '" + username + "';";
+
+	double balance = atof(databases[selectedDatabase]->sendQuery(q4).c_str());
+
 	printf("selected = %d\n", selectedDatabase);
 
-	if(!strcmp(&databases[selectedDatabase]->select(q1)[0], &password[0]))
+	if(!strcmp(&databases[selectedDatabase]->sendQuery(q1)[0], &password[0]))
 	{
-		loggedInUsers.push_back(new User(loggedInUsers.size(), databases[selectedDatabase]->select(q3), username, password, (atoi(&databases[selectedDatabase]->select(q2)[0]) == 1 ? true : false)));
-		loggedInUsers[loggedInUsers.size()-1]->login(token, ip);
+		users.push_back(new User(users.size(), databases[selectedDatabase]->sendQuery(q3), username, password, (atoi(&databases[selectedDatabase]->sendQuery(q2)[0]) == 1 ? true : false)));
+		users[users.size()-1]->login(token, ip);
+		users[users.size()-1]->setBalance(balance);
 		return "OK";
 	}
 	return "could not match username to password";
@@ -460,13 +492,13 @@ WebServer::registerUser(std::string name, std::string username, std::string pass
 		return "this password is too long";
 
 	std::string q1 = "SELECT username FROM Players WHERE username = '" + username + "';";
-	if(!strcmp(&databases[selectedDatabase]->select(q1)[0], &username[0]))
+	if(!strcmp(&databases[selectedDatabase]->sendQuery(q1)[0], &username[0]))
 	{
 		return "This username is already taken";
 	}
 	
 	std::string q2 = "INSERT INTO Players superUser = " + std::string(isAdmin ? "1" : "0") + ", name = " + name + ", username = " + username + ", password = " + password + ";";
-	if(!databases[selectedDatabase]->insert(q2))
+	if(!atoi(databases[selectedDatabase]->sendQuery(q2).c_str()))
 	{
 		printf("Registered user with \n\tname {%s};\n\tusername {%s};\n\tpassword {%s};\n", &name[0], &username[0], &password[0]);
 		return "OK";
@@ -477,26 +509,27 @@ WebServer::registerUser(std::string name, std::string username, std::string pass
 bool
 WebServer::logout(std::string token, std::string ip)
 {
-	for(unsigned int i = 0; i < loggedInUsers.size(); ++i)
+	for(unsigned int i = 0; i < users.size(); ++i)
 	{
-		if( (loggedInUsers[i]->getToken() == token) && (loggedInUsers[i]->getIp() == ip) )
+		if( (users[i]->getToken() == token) && (users[i]->getIp() == ip) )
 		{
-			loggedInUsers[i]->logout();
-			delete loggedInUsers[i];
-			loggedInUsers.erase(loggedInUsers.begin() + i);
+			users[i]->logout();
+			databases[selectedDatabase]->save(*users[i]);
+			delete users[i];
+			users.erase(users.begin() + i);
 			break;
 		}
 	}
-	printf("loggedInUsers = %d\n", (int)loggedInUsers.size());
+	printf("users = %d\n", (int)users.size());
 	return true;
 }
 
 bool
 WebServer::verifyUser(std::string token, std::string ip)
 {
-	for(unsigned int i = 0; i < loggedInUsers.size(); ++i)
+	for(unsigned int i = 0; i < users.size(); ++i)
 	{
-		if( (loggedInUsers[i]->getToken() == token) && (loggedInUsers[i]->getIp() == ip) )
+		if( (users[i]->getToken() == token) && (users[i]->getIp() == ip) )
 		{
 			return true;
 		}
