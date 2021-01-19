@@ -13,14 +13,14 @@
 }
 
 .settlement {
-	font-size: 5vw;
+	font-size: 4vw;
 	color: maroon;
 	-webkit-text-stroke: 1px black;
 	font-weight: bold;
 	background: transparent;
 	position: absolute;
 	text-align: center;
-	left: 44vw;
+	left: 45.2vw;
 	z-index: 1;
 	transform: rotate(-20deg);
 }
@@ -102,7 +102,7 @@ h3 {
 	font-size: 2vw;
 	text-align: center;
 	white-space: nowrap;
-	padding: 10px;
+	padding: 0;
 	margin: auto;
 	color: green;
 }
