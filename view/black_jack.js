@@ -60,10 +60,11 @@ async function init()
 				insuranceD.style.display = "block";
 			else if(p == 3)
 				splitD.style.display = "block";
-			else if(p == 5)
-				stopD.style.display = "block";
-			else
+			else if(p == 4)
 				hitD.style.display = "block";
+			else
+				stopD.style.display = "block";
+
 		}
 	}, false);
 	document.getElementById("blackjackInsuranceButtonYes").addEventListener("click", async function(event) 
@@ -78,10 +79,10 @@ async function init()
 		let p = await getPhase();
 			if(p == 3)
 				splitD.style.display = "block";
-			else if(p == 5)
-				stopD.style.display = "block";
-			else
+			else if(p == 4)
 				hitD.style.display = "block";
+			else
+				stopD.style.display = "block";
 		insuranceD.style.display = "none";
 		console.log("phase:" + p);
 	}, false);
@@ -92,13 +93,14 @@ async function init()
 			insuranceF.style.display = "none";
 			await getBalance();
 			await getHands();
+			await getSettlement();
 			let p = await getPhase();
 				if(p == 3)
 					splitD.style.display = "block";
-				else if(p == 5)
-					stopD.style.display = "block";
-				else
+				else if(p == 4)
 					hitD.style.display = "block";
+				else
+					stopD.style.display = "block";
 		}
 	}, false);
 	document.getElementById("blackjackStandButton").addEventListener("click", async function(event)

@@ -16,9 +16,6 @@ FileIO::getFileContent(const char * file)
 {	
 	try
 	{
-		
-		printf("filePath: %s\n", file);
-		
 		FILE * FP = fopen(strcmp(file, viewDir) ? file : defaultFile, "r");
 		if(FP == nullptr)
 		{

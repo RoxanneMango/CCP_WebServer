@@ -388,7 +388,7 @@ BlackJack::hittingPhase()
 		dealer->revealCard();
 		isDone = false;
 		isReady = false;
-		if(!isLose[0] && !isLose[1])
+		if(!isLose[0] || !isLose[1])
 		{
 			int sum = dealer->hand[0][0].getValue() + dealer->hand[0][1].getValue();
 			while(sum < 14)

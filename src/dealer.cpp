@@ -65,7 +65,7 @@ Dealer::dealCard(BlackjackUser * user, int handIndex)
 {
 	srand(time(0));
 	int index = rand() % ((*numOfDecks)-1);
-	user->hand[handIndex].push_back((*cards)[index].getCard());
+	user->hand[handIndex].push_back((*cards)[index].getCard());	
 }
 
 /*

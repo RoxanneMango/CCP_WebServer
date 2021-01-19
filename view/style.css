@@ -8,7 +8,7 @@
 
 .errorResponse {
 	width: 100%;
-	margin: 3% 0%;
+	margin: 1vw;
 	color: red;
 }
 
@@ -27,19 +27,23 @@
 
 .userInfo * {
 	display: inline-block;
-	margin: 1% 0%;
+	margin: 1vw 0;
 	text-align: center;
-	font-size: 2vw;
+	font-size: 1.5vw;
 	color: green;
 }
 
 #UserInfo > div {
 	text-align: left;
-	font-size: 2vw;
+	font-size: 1.3vw;
+}
+
+.info {
+	margin: 0.5vw;
 }
 
 #UserInfo {
-	width: 55vw;
+	width: 50vw;
 	align: center;
 	margin: auto;
 }
@@ -50,25 +54,25 @@
 	color: #cfcfcf;
 	border: 1px groove #cfcfcf;
 	padding: 10px;
-	margin: 3% 0%;
+	margin: 2vw 0;
 } .userButton:hover {
 	cursor: pointer;
 	color: green;
 }
 
 .word_container {
-	width: 55vw;
-	margin: 3%;
+	width: 50vw;
+	margin: 1vw 0 1.5vw 0;
 	border-width: 1px;
 	border-style: solid none solid none;
 	border-color: #cfcfcf;
-	padding: 10px;
+	padding: 0 1vw;
 }
 
 .divider {
-	width: 55vw;
+	width: 50vw;
 	height: 1px;
-	margin: 3%;
+	margin: 1.5vw;
 	padding: 0 10px;
 	border-width: 1px;
 	border-style: solid none none none;
@@ -80,22 +84,22 @@ p {
 }
 h4.turnIndicator {
 	color: #cfcfcf;
-	font-size: 3vw;
+	font-size: 2vw;
 	display: inline-block;
-	margin: 2vw;
+	margin: 1vw;
 }
 h1 {
-	font-size: 4vw;
+	font-size: 3vw;
 	text-align: center;
 	white-space: nowrap;
-	width: 50%;
-	padding: 20px;
+	width: 50vw;
+	padding: 10px;
 	border: 3px groove #cfcfcf;
-	margin: auto;
+	margin: 0 0 1.5vw 0;
 }
 
 h3 {
-	font-size: 3vw;
+	font-size: 2vw;
 	text-align: center;
 	white-space: nowrap;
 	padding: 10px;
@@ -104,7 +108,7 @@ h3 {
 }
 
 h4 {
-	font-size: 2vw;
+	font-size: 1.5vw;
 	text-align: center;
 	font-weight: normal;
 	white-space: nowrap;
@@ -123,7 +127,7 @@ a {
 .formContainer {
 	border: 2px groove #cfcfcf;
 	padding: 10px;
-	width: 40%;
+	width: 40vw;
 }
 
 .formContainer hr {
@@ -131,28 +135,29 @@ a {
 	background-color: #575757;
 	height: 3px;
 	border: none;
+	margin: 1vw;
 }
 
 .formInput {
-	width: 60%;
-	font-size: 2vw;
+	width: 25vw;
+	font-size: 1.5vw;
 	text-align: center;
 	color: #cfcfcf;
 	border: 3px groove #cfcfcf;
 	padding: 10px;
-	margin: 3%;
+	margin: 1vw;
 } .formInput:hover {
 	cursor: text;
 	color: green;
 }
 
 .formButton {
-	width: 75%;
-	font-size: 2vw;
+	width: 25vw;
+	font-size: 1.5vw;
 	color: #cfcfcf;
 	border: 3px groove #cfcfcf;
 	padding: 10px;
-	margin: 3%;
+	margin: 1vw;
 } .formButton:hover {
 	cursor: pointer;
 	color: green;
@@ -166,19 +171,25 @@ input[type=number]::-webkit-outer-spin-button {
 
 .button {
 	display: inline-block;
-	width: 25%;
-	font-size: 2vw;
+	width: 25vw;
+	font-size: 1.5vw;
 	color: #cfcfcf;
 	border: 3px groove #cfcfcf;
 	padding: 10px;
-	margin-bottom: 3%;
+	margin-bottom: 2vw;
    -webkit-appearance: none;
    -moz-appearance: none;
    appearance: none;
 } .button:hover {
 	cursor: pointer;
 	color: green;
-} .menu a:last-child .button {
+} 
+
+.menu {
+	padding: 0;
+	margin: 0;
+}
+.menu a:last-child .button {
 	margin: 0;
 } .menu button:last-child .button {
 	margin: 0;
@@ -186,12 +197,12 @@ input[type=number]::-webkit-outer-spin-button {
 
 .card {
 	display: inline-block;
-	width: 7vw;
-	height: 10vw;
+	width: 5vw;
+	height: 7vw;
 	background: black;
 	border: 2px solid #cfcfcf;
 	border-radius: 5px;
-	margin: 1vw;
+	margin: 0.5vw;
 	padding: 0;
 	z-index: 0;
 }
@@ -204,23 +215,23 @@ input[type=number]::-webkit-outer-spin-button {
 	position: relative;
 	color: #cfcfcf;
 	background: transparent;
-	font-size: 2vw;
+	font-size: 1.3vw;
 	font-weight: bold;
 	text-align: left;
-	margin: 0.5vw;
+	margin: 0.4vw;
 	padding: 0;
 
 }
 .mirror {
 	transform: rotate(180deg);
-	margin: 0.5vw;
+	margin: 0.4vw;
 }
 
 .cardSuit {
 	position: relative;
 	color: #cfcfcf;
 	background: transparent;
-	font-size: 3vw;
+	font-size: 2vw;
 	font-weight: bold;
 	margin: auto;
 	padding: 0;
