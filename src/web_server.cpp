@@ -1,7 +1,8 @@
 #include "web_server.h"
 
-WebServer::WebServer( Socket & serverSocket, Socket & clientSocket, Param & param ) :
+WebServer::WebServer( Socket & serverSocket, Socket & clientSocket, Param & param, const char * viewDir, const char * defaultFile) :
 	Server(serverSocket, clientSocket),
+	fileIO(viewDir, defaultFile),
 	param(param)
 {	
 	// default headerSize

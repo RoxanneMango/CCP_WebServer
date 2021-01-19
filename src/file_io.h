@@ -8,10 +8,12 @@
 class FileIO
 {
 private:
-	const char * DEFAULT_FILE = "index.html";
+	const char * viewDir;
+	char * defaultFile;
 public:
-	FileIO()
-	{}
+	FileIO(const char * viewDir, const char * defaultFile);
+	~FileIO();
+	
 	std::string getFileContent(const char * file);
 };
 

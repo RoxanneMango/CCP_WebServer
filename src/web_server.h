@@ -19,7 +19,6 @@ class WebServer : public Server
 	const char * TP_RESPONSE = "HTTP/1.0 418 I'm a teapot\r\n";
 
 	const char * PREFIX = "view/";
-
 	const char * OK_CODE = "OK";
 	
 	bool hasFavicon = false;
@@ -41,8 +40,6 @@ class WebServer : public Server
 
 	unsigned int maxUsers = 5;
 	std::vector<User *> loggedInUsers;
-
-	std::vector<User> userBase;
 	
 	void clearBuffers();
 	void resizeHeader();
@@ -50,7 +47,7 @@ class WebServer : public Server
 	bool isPublic(char * fileName);
 	
 public:
-	WebServer(Socket & serverSocket, Socket & clientSocket, Param & param);
+	WebServer(Socket & serverSocket, Socket & clientSocket, Param & param, const char * viewDir, const char * defaultFile);
 	~WebServer();
 
 	enum Type { Post, Get, Put, Patch, Delete };

@@ -1,39 +1,16 @@
 #include "file_io.h"
-/*
-int 
-FileIO::getFileSize(const char * file)
-{
-	try
-	{
-		FILE * FP = fopen(strlen(file) ? file : DEFAULT_FILE, "r");
-		if(FP == nullptr)
-		{
-			throw "Could not open file.";
-		}
 
-		int i = 0;
-		int c;
-		
-		while ((c = fgetc(FP)) != EOF)
-		{
-			i++;
-		}
-		if (feof(FP))
-		{
-			fclose(FP);
-			return i;
-		}
-		throw "File error.";
-	}
-	
-	catch(const char * exception)
-	{
-		printf("Exception : %s\n", exception);
-	}
-	
-	return -1;
+FileIO::FileIO(const char * viewDir, const char * defaultFile) : viewDir(viewDir)
+{
+	this->defaultFile = (char *) calloc(strlen(viewDir) + strlen(defaultFile) + 1, sizeof(char));
+	strcpy(this->defaultFile, viewDir);
+	strcat(this->defaultFile, defaultFile);
 }
-*/
+FileIO::~FileIO()
+{
+	free(this->defaultFile);
+}
+
 std::string
 FileIO::getFileContent(const char * file)
 {	
@@ -42,7 +19,7 @@ FileIO::getFileContent(const char * file)
 		
 		printf("filePath: %s\n", file);
 		
-		FILE * FP = fopen(strlen(file) ? file : DEFAULT_FILE, "r");
+		FILE * FP = fopen(strcmp(file, viewDir) ? file : defaultFile, "r");
 		if(FP == nullptr)
 		{
 			throw "Could not open file.";

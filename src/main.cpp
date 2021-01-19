@@ -29,7 +29,7 @@ main(int argc, char ** argv)
 	OnlineDatabase		database(id_db, connectionSocket_db, ipAddress_db, port_db, bufferSize_db);
 	
 	// All the dependency injection
-	WebServer server(listenSocket, connectionSocket, param);
+	WebServer server(listenSocket, connectionSocket, param, "view/", "index.html");
 	server.addDatabase(&database);
 	server.addGame(&blackJack);
 
