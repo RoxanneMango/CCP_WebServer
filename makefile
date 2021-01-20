@@ -78,4 +78,7 @@ clean:
 	$(DELETE) $(BUILD)/$(OUT)/$(EXEC)
 	$(DELETE) $(BUILD)/$(OUT)/$(DB_EXEC)
 
+doxygen:
+	cd $(SRC) && doxygen doxyconfig
+
 endif

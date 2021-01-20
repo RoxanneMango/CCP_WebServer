@@ -584,6 +584,19 @@ BlackJack::input(Param param)
 				throw "BETTING_AMOUNT_TOO_MUCH";
 			if(atof(param.values[1]) > ((BlackjackUser *)(users[0]))->getBalance())
 				throw "NOT_ENOUGH_BALANCE";
+			
+			time_t timeOut = time(NULL) + 5; // 5 second timeout time
+			while(!((User *)(users[0]))->isReady)
+			{
+				if(time(NULL) >= timeOut)
+				{
+					break;
+				}
+				SLEEP(0.1);
+			}
+			if(!((User *)(users[0]))->isReady)
+				throw "USER_NOT_READY";
+
 			((BlackjackUser *)(users[0]))->isReady = false;
 			bettingAmount[0] = atof(param.values[1]);
 			isReady = false;
@@ -599,6 +612,19 @@ BlackJack::input(Param param)
 				throw "INSURANCE_AMOUNT_INVALID";
 			if(atof(param.values[1]) > (bettingAmount[0] / 2))
 				throw "INSURANCE_AMOUNT_TOO_BIG";
+
+			time_t timeOut = time(NULL) + 5; // 5 second timeout time
+			while(!((User *)(users[0]))->isReady)
+			{
+				if(time(NULL) >= timeOut)
+				{
+					break;
+				}
+				SLEEP(0.1);
+			}
+			if(!((User *)(users[0]))->isReady)
+				throw "USER_NOT_READY";
+
 			((BlackjackUser *)(users[0]))->isReady = false;
 			insuranceAmount = atof(param.values[1]);
 			isReady = false;

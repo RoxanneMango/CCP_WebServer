@@ -14,7 +14,6 @@ WebServer::WebServer( Socket & serverSocket, Socket & clientSocket, Param & para
 	RESPONSE = (char *) calloc(64, sizeof(char));
 	strcpy(RESPONSE, "HTTP/1.0 200 OK\r\n");
 	
-	
 	try
 	{
 		if(saveThread.joinable())
@@ -341,6 +340,10 @@ WebServer::processParam()
 							}
 							SLEEP(0.1);
 						}
+						if(!users[i]->isReady)
+						{
+							throw "user is not ready";
+						}
 						double balance = 0;
 						if((balance = atof(param.values[1])) <= 0)
 						{
@@ -439,9 +442,6 @@ WebServer::processParam()
 	{
 		buffer.assign("Error : ");
 		buffer.append(exception);
-		
-//		sprintf(&buffer[0], "Error : %s", exception);
-//		printf("Exception : %s\n", exception);
 		return;
 	}
 }
