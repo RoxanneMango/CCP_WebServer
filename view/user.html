@@ -20,6 +20,16 @@
 				<div class="info" id="balance">balance: </div>
 				<div class="info" id="gamesPlayed">games played: </div>
 				<div class="info" id="gamesWon">games won: </div>
+				
+				<div><input id="addBalanceButton" class="userButton" type="submit" name="add_balance_button" value="add balance"\></div>
+				<div id="addBalance" style="text-align:center;" hidden>
+					<form id="addBalanceForm" class="formContainer" method="post" action="/user">
+						<input id="balanceAmount" class="formInput" placeholder="0.0" type="number" name="balanceAmount" min="0" max="4000" step="0.5">
+						<input id="addBalanceSubmitFormButton" class="formButton" type="submit" value="add">
+						<div id="errorResponseAddBalance" class="errorResponse"></div>
+					</form>
+				</div>
+				
 				<div><input class="userButton" type="submit" name="edit_button" value="edit"\></div>
 			</div>
 		</div>
@@ -29,5 +39,6 @@
 	<script type="text/javascript" src="auth_home.js"></script>
 	<script type="text/javascript" src="loggedIn.js"></script>
 	<script type="text/javascript" src="get_name.js"></script>
+	<script type="text/javascript" src="user.js"></script>
 </body>
 </html>

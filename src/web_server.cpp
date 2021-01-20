@@ -223,6 +223,7 @@ WebServer::isPublic(char * fileName)
 	if(!(strcmp(fileName, "register.html"))) return true;
 	if(!(strcmp(fileName, "register.js"))) return true;
 	if(!(strcmp(fileName, "auth.js"))) return true;
+	if(!(strcmp(fileName, "user.js"))) return true;
 	if(!(strcmp(fileName, "style.css"))) return true;
 	
 	return false;
@@ -317,6 +318,36 @@ WebServer::processParam()
 							SLEEP(0.1);
 						}
 						buffer.assign(std::to_string(users[i]->getBalance()));
+						return;
+					}
+				}
+			}
+			throw "no user logged in with this ip or token.";
+		}
+		else if(strncmp(receiveBuffer, "POST /addBalance", 16) == 0)
+		{
+			for(unsigned int i = 0; i < users.size(); ++i)
+			{
+				if(users[i]->getIp() == clientSocket.getIpAddress())
+				{
+					if(users[i]->getToken() == param.values[0])
+					{
+						time_t timeOut = time(NULL) + 5; // 5 second timeout time
+						while(!users[i]->isReady)
+						{
+							if(time(NULL) >= timeOut)
+							{
+								break;
+							}
+							SLEEP(0.1);
+						}
+						double balance = 0;
+						if((balance = atof(param.values[1])) <= 0)
+						{
+							throw "cannot add balance : invalid balance";
+						}
+						users[i]->addBalance(balance);
+						
 						return;
 					}
 				}
