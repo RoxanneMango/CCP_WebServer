@@ -39,3 +39,8 @@ Observer pattern
 - BlackJack::run() runs on a seperate thread than the server once the game is started
 - BlackJack bases its state and actions on (a combination of) flag(s) which it constantly observes in the BlackJack::run() function
 - BlackJack flags are set by the server
+
+### Concurrency pattern(s)
+Readers–writer lock
+- The User::balance variable is accessed and updated in both the server thread and BlackJack thread(s). To prevent errors, the User::isFree lock must first be unlocked before User::balance can be read from or written to.
+- The server thread and BlackJack thread(s) will wait for five seconds for the lock to unlock, otherwise they will throw an error and skip the intended access.
