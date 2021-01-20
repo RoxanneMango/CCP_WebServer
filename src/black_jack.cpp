@@ -132,7 +132,7 @@ BlackJack::init()
 		cardDecks.push_back(DeckOfCards());
 	}
 
-	dealer = new Dealer(&cardDecks, &this->numOfDecks);
+	dealer = Dealer::create(&cardDecks, &this->numOfDecks);
 	users.push_back(dealer);
 	
 	dealer->shuffle();
@@ -815,7 +815,7 @@ BlackJack::isRunning()
 User *
 BlackJack::addUser(User * user)
 {
-	BlackjackUser * blackjackUser = new BlackjackUser(*user);
+	BlackjackUser * blackjackUser = BlackjackUser::create(*user);
 	delete user;
 	users.push_back(blackjackUser);
 	return blackjackUser;

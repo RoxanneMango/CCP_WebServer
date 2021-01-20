@@ -18,6 +18,11 @@ public:
 	void split(BlackjackUser * user);
 	void dealCard(BlackjackUser * user, int handIndex);
 	void revealCard();
+	
+	static Dealer * create(std::vector<DeckOfCards> * cards, unsigned int * numOfDecks)
+	{
+		return new Dealer(cards, numOfDecks);
+	}
 };
 
 #endif // DEALER_H

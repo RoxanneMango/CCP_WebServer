@@ -48,7 +48,6 @@ class WebServer : public Server
 	bool isPublic(char * fileName);
 	
 	void saveTimer();
-	
 	std::thread saveThread;
 	
 public:

@@ -16,8 +16,6 @@ public:
 	
 	virtual ~BlackjackUser();
 
-//	User * userHandle;	
-
 	std::vector<Chip> chips;
 	std::vector<Card> hand[2];
 
@@ -31,6 +29,15 @@ public:
 	void resetHand();
 	
 	double getBettingAmount();
+	
+	static BlackjackUser * create(User & user)
+	{
+		return new BlackjackUser(user);
+	}
+	static BlackjackUser * create(int id, std::string name)
+	{
+		return new BlackjackUser(id, name);
+	}
 };
 
 #endif // BLACKJACK_USER_H

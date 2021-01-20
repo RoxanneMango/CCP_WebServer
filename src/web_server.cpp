@@ -467,7 +467,7 @@ WebServer::login(std::string token, std::string username, std::string password, 
 
 	if(!strcmp(&databases[selectedDatabase]->sendQuery(q1)[0], &password[0]))
 	{
-		users.push_back(new User(users.size(), databases[selectedDatabase]->sendQuery(q3), username, password, (atoi(&databases[selectedDatabase]->sendQuery(q2)[0]) == 1 ? true : false)));
+		users.push_back(User::create(users.size(), databases[selectedDatabase]->sendQuery(q3), username, password, (atoi(&databases[selectedDatabase]->sendQuery(q2)[0]) == 1 ? true : false)));
 		users[users.size()-1]->login(token, ip);
 		users[users.size()-1]->setBalance(balance);
 		return "OK";

@@ -58,6 +58,12 @@ public:
 	
 	void sudo() { superUser = true; }
 	int getID() { return id; }
+	
+	static User * create(int id, std::string name, std::string username, std::string password, bool superUser = false)
+	{
+		return new User(id, name, username, password, superUser);
+	}
+	
 };
 
 #endif // PLAYER_H
