@@ -1,6 +1,22 @@
 # CCP_WebServer
 Webserver with database and support to play games in the browser
 
+## TODO:
+- Open-closed principle in WebServer, by giving the routes (like /blackjack) via dependency injection
+- Read configurations from a config file, instead of hardcoded in the main.cpp
+  - ip
+  - port
+  - routes
+  - etc
+- Convert User::hand (std::vector<Card>) into its own Hand object
+- House user-specific flags which currently reside in BlackJack in the User itself
+- For the scheduled-task pattern, unit of work could be used
+- Use authorization headers instead of tokens within the POST payload
+  - Makes it possible to send GET requests with authentication
+- Maybe convert Game::users into a template, instead of void pointers
+  - The type of user is not going to change once a game has been initialized
+
+
 ## Patterns:
 ### Creational pattern(s):
 Factory pattern
@@ -34,11 +50,6 @@ Scheduled-task pattern
 - Both the server (main.cpp) and database (database/db.cpp) have autosave functions running on one minute intervals.
 - The server autosave sends UPDATE queries to the database
 - The database writes its current state to the savefile (database.db)
-
-Observer pattern
-- BlackJack::run() runs on a seperate thread than the server once the game is started
-- BlackJack bases its state and actions on (a combination of) flag(s) which it constantly observes in the BlackJack::run() function
-- BlackJack flags are set by the server
 
 ### Concurrency pattern(s)
 Readers–writer lock
