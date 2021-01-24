@@ -2,13 +2,16 @@
 #include "online_database.h"
 #include "web_server.h"
 #include "socket.h"
+#include "sleep.h"
+#include "console.h"
 
 //http://www.hoeoudbenikookalweer.nl:44900
 
 int
 main(int argc, char ** argv)
 {	
-	const char * ipAddress	= 	"192.168.1.9";
+//	const char * ipAddress	= 	"192.168.1.9";
+	const char * ipAddress	= 	"127.0.0.1";
 	unsigned short port		=	44900;
 	unsigned int paramSize 	= 	64;
 	
@@ -32,6 +35,8 @@ main(int argc, char ** argv)
 	WebServer server(listenSocket, connectionSocket, param, "view/", "index.html");
 	server.addDatabase(&database);
 	server.addGame(&blackJack);
+	
+	Console console(server, 32);
 
 	for(;;)
 	{
@@ -41,6 +46,7 @@ main(int argc, char ** argv)
 		server.readSocket();
 		
 		//server.printRequestFirstLine(); printf("\n"); fflush(stdout);
+		server.printRequest(400); printf("\n"); fflush(stdout);
 		
 		switch(server.checkRequestType())
 		{

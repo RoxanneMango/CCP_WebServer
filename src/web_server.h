@@ -62,7 +62,7 @@ public:
 
 	void writeSocket();
 
-	void printRequest();
+	void printRequest(unsigned int len = 0);
 	void printRequestFirstLine();
 	//
 	int checkRequestType();
@@ -78,6 +78,13 @@ public:
 	const char * login(std::string token, std::string username, std::string password, std::string ip);
 	bool logout(std::string token, std::string ip);
 	bool verifyUser(std::string token, std::string ip);
+	
+	void save();
+	
+	void reload()
+	{
+		printf("> Reload complete.\n");
+	}
 };
 
 #endif // WEB_SERVER_H

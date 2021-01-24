@@ -40,6 +40,7 @@ OnlineDatabase::sendQuery(std::string query)
 std::string 
 OnlineDatabase::save(std::vector<User *> & users)
 {
+	isBusy = true;
 	for(User * user : users)
 	{
 		// trim off 4 extra zeroes at end
@@ -49,19 +50,21 @@ OnlineDatabase::save(std::vector<User *> & users)
 		std::string q = "UPDATE Players balance = " + balance + "; WHERE username = '" + user->getUsername() + "';";
 		sendQuery(q);
 	}	
-
+	isBusy = false;
 	return "SAVED";
 }
 
 std::string 
 OnlineDatabase::save(User & user)
 {
+	isBusy = true;
 	// trim off 4 extra zeroes at end
 	std::string tmp = std::to_string(user.getBalance());
 	std::string balance = tmp.substr(0, tmp.length()-4);
 	
 	std::string q = "UPDATE Players balance = " + balance + "; WHERE username = '" + user.getUsername() + "';";
 	sendQuery(q);
+	isBusy = false;
 	
 	return "SAVED";
 }

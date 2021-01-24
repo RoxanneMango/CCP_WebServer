@@ -15,6 +15,7 @@ public:
 	
 	unsigned int id;
 	std::string name;
+	bool isBusy = false;
 
 	virtual std::string sendQuery(std::string query) = 0;
 	virtual std::string save(std::vector<User *> & users) = 0;

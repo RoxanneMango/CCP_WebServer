@@ -38,13 +38,26 @@ WebServer::~WebServer()
 }
 
 void
+WebServer::save()
+{
+	if(!databases[selectedDatabase]->isBusy)
+	{
+		databases[selectedDatabase]->save(users);
+		printf("> Save successful.\n");
+	}
+	else
+	{
+		printf("[!] Database is already saving!\n");
+	}
+}
+
+void
 WebServer::saveTimer()
 {
 	for(;;)
 	{
-		printf("Saving . . .\n");
-		databases[selectedDatabase]->save(users);
-		printf("Save successful.\n");
+		printf("save\n");
+		save();
 		SLEEP(60);
 	}
 }
@@ -87,13 +100,16 @@ WebServer::clearBuffers()
 }
 
 void
-WebServer::printRequest()
+WebServer::printRequest(unsigned int len)
 {
-	for(unsigned int i = 0; i < strlen(receiveBuffer); i++)
+	if(!len)
+	{
+		len = strlen(receiveBuffer);
+	}
+	for(unsigned int i = 0; i < len; i++)
 	{
 		printf("%c", receiveBuffer[i]);
 	}
-	printf("\n\n\n");
 }
 
 void

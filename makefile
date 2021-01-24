@@ -12,7 +12,7 @@ BUILD = build
 OUT = out
 DB = $(SRC)/database
 
-OBJECTS = file_io.o param.o server.o web_server.o black_jack.o chip.o card.o deck_of_cards.o user.o database_server.o online_database.o dealer.o blackjack_user.o
+OBJECTS = file_io.o param.o server.o web_server.o black_jack.o chip.o card.o deck_of_cards.o user.o database_server.o online_database.o dealer.o blackjack_user.o console.o
 EXEC = server
 
 DB_OBJECTS = server.o database_server.o
