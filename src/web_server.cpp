@@ -1,9 +1,8 @@
 #include "web_server.h"
 
-WebServer::WebServer( Socket & serverSocket, Socket & clientSocket, Param & param, const char * viewDir, const char * defaultFile) :
+WebServer::WebServer( Socket & serverSocket, Socket & clientSocket, const char * viewDir, const char * defaultFile) :
 	Server(serverSocket, clientSocket),
 	fileIO(viewDir, defaultFile),
-	param(param),
 	headers(128)
 {	
 	// default headerSize
@@ -38,6 +37,16 @@ WebServer::~WebServer()
 	// free all allocated memory for header
 	free(header);
 	free(RESPONSE);
+	for(unsigned int i = 0; i < params.size(); ++i)
+	{
+		delete params[i];
+	}
+	params.clear();
+	for(unsigned int i = 0; i < headers.size(); ++i)
+	{
+		delete headers[i];
+	}
+	headers.clear();
 }
 
 void
@@ -261,15 +270,15 @@ WebServer::processParam()
 		// get params
 		if(getKeyAndValue() < 0)
 			throw "Please do not do that.";
-		if( (param.keys.size() < 1) || (param.values.size() < 1) )
+		if( (params.size() < 1) )
 			throw "There were no params";
 		if(strncmp(receiveBuffer, "POST /register", 14) == 0)
 		{
-			if(param.values.size() < 3)
+			if(params.size() < 3)
 			{
 				throw "Not enough parameters for register command.";
 			}
-			const char * response = registerUser(param.values[1], param.values[2], param.values[3]);
+			const char * response = registerUser(params[1]->value, params[2]->value, params[3]->value);
 			if(response != OK_CODE)
 			{
 				throw response;
@@ -277,11 +286,11 @@ WebServer::processParam()
 		}
 		else if(strncmp(receiveBuffer, "POST /login", 11) == 0)
 		{
-			if(param.values.size() < 2)
+			if(params.size() < 2)
 			{
 				throw "Not enough parameters for login command.";
 			}
-			const char * response = login(param.values[0], param.values[1], param.values[2], clientSocket.getIpAddress());
+			const char * response = login(params[0]->value, params[1]->value, params[2]->value, clientSocket.getIpAddress());
 			if(strcmp(response, OK_CODE))
 			{
 				throw response;
@@ -289,22 +298,22 @@ WebServer::processParam()
 		}
 		else if(strncmp(receiveBuffer, "POST /logout", 12) == 0)
 		{
-			if(param.values.size() < 1)
+			if(params.size() < 1)
 			{
 				throw "Not enough parameters for logout command.";
 			}
-			if(!logout(param.values[0], clientSocket.getIpAddress()))
+			if(!logout(params[0]->value, clientSocket.getIpAddress()))
 			{
 				throw "Could not logout user";
 			}
 		}
 		else if(strncmp(receiveBuffer, "POST /loggedIn", 14) == 0)
 		{
-			if(param.keys.size() < 1)
+			if(params.size() < 1)
 			{
 				throw "Not enough parameters for loggedIn command.";
 			}
-			buffer.assign(std::to_string(verifyUser(param.values[0], clientSocket.getIpAddress())));
+			buffer.assign(std::to_string(verifyUser(params[0]->value, clientSocket.getIpAddress())));
 		}
 		else if(strncmp(receiveBuffer, "POST /getName", 13) == 0)
 		{
@@ -312,7 +321,7 @@ WebServer::processParam()
 			{
 				if(users[i]->getIp() == clientSocket.getIpAddress())
 				{
-					if(users[i]->getToken() == param.values[0])
+					if(users[i]->getToken() == params[0]->value)
 					{
 						buffer.assign(users[i]->getName());
 						return;
@@ -327,7 +336,7 @@ WebServer::processParam()
 			{
 				if(users[i]->getIp() == clientSocket.getIpAddress())
 				{
-					if(users[i]->getToken() == param.values[0])
+					if(users[i]->getToken() == params[0]->value)
 					{
 						time_t timeOut = time(NULL) + 5; // 5 second timeout time
 						while(!users[i]->isReady)
@@ -351,7 +360,7 @@ WebServer::processParam()
 			{
 				if(users[i]->getIp() == clientSocket.getIpAddress())
 				{
-					if(users[i]->getToken() == param.values[0])
+					if(users[i]->getToken() == params[0]->value)
 					{
 						time_t timeOut = time(NULL) + 5; // 5 second timeout time
 						while(!users[i]->isReady)
@@ -367,7 +376,7 @@ WebServer::processParam()
 							throw "user is not ready";
 						}
 						double balance = 0;
-						if((balance = atof(param.values[1])) <= 0)
+						if((balance = atof(params[1]->value.c_str())) <= 0)
 						{
 							throw "cannot add balance : invalid balance";
 						}
@@ -387,17 +396,11 @@ WebServer::processParam()
 		else if(strncmp(receiveBuffer, "POST /blackjack", 15) == 0)
 		{
 			// { command_key : command_value, token : <token> }
-			if( (param.keys.size() < 1) || (param.values.size() < 1) )
+			if(params.size() < 1)
 				throw "Not enough keys or values for blackjack command.";
 
 			// add ip address to param; Param class deallocates allocated resources automatically
-			char * ip_key = (char *) calloc(7, sizeof(char));
-			strcpy(ip_key, "ip_key");
-			char * ip_value = (char *) calloc(strlen(&clientSocket.getIpAddress()[0]), sizeof(char));
-			strcpy(ip_value, "ip_value");
-			//
-			param.keys.push_back(ip_key);
-			param.values.push_back(ip_value);
+			params.push_back(new Param(std::string("ip"), clientSocket.getIpAddress()));
 
 			// first check for existence of blackjack game in the list of games
 			for(Game * game : games)
@@ -411,9 +414,9 @@ WebServer::processParam()
 						if(loggedInUser->getIp() == clientSocket.getIpAddress())
 						{
 							// then verify their token
-							if(loggedInUser->getToken() == param.values[0])
+							if(loggedInUser->getToken() == params[0]->value)
 							{
-								if(!strcmp(param.keys[0], "join"))
+								if(!strcmp(params[0]->key.c_str(), "join"))
 								{
 									if(game->isRunning())
 										throw "GAME_ALREADY_IN_PROGRESS";
@@ -439,7 +442,7 @@ WebServer::processParam()
 								{
 									if(loggedInUser->getID() == ((User *)(game->users[0]))->getID())
 									{
-										buffer.assign(game->input(param));
+										buffer.assign(game->input(params));
 										return;
 									}
 								}
@@ -469,9 +472,15 @@ WebServer::processParam()
 }
 
 int
+WebServer::getHeader()
+{
+	return Param::getHeader(receiveBuffer, headers);
+}
+
+int
 WebServer::getKeyAndValue()
 {
-	return param.getKeyAndValue(receiveBuffer);
+	return Param::getKeysAndValues(receiveBuffer, params);
 }
 
 void

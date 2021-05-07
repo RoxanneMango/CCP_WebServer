@@ -148,7 +148,7 @@ public:
 	BlackJack(int id, unsigned int numOfDecks);
 	~BlackJack();
 	
-	std::string input(Param param);
+	std::string input(std::vector<Param *> & params);
 	
 	void init();
 	void run();

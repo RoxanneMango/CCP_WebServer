@@ -1,6 +1,6 @@
 #include "param.h"
 
-Param::Param(unsigned int paramSize) : paramSize(paramSize)
+Param::Param(std::string key, std::string value) : key(key), value(value)
 {}
 
 Param::~Param()
@@ -9,12 +9,12 @@ Param::~Param()
 bool
 Param::is_letter(char character)
 {
-	return ( ( (tolower(character) < ASCII::LOWER_LETTER_A) || (tolower(character) > ASCII::LOWER_LETTER_Z) ) ? false : true );
+	return ( (tolower(character) >= 'a') || (tolower(character) <= 'z') );
 }
 bool
 Param::is_number(char character)
 {
-	return ( ( (character < ASCII::STR_ZERO) || (character > ASCII::STR_NINE) ) ? false : true );
+	return ( (character >= '0') || (character <= '9') );
 }
 
 int
@@ -53,25 +53,11 @@ Param::getParamSize(char * receiveBuffer)
 void
 Param::print()
 {
-	for(unsigned int i = 0; i < keys.size(); ++i)
-	{
-		printf("key_value[%d] = {\"%s\":\"%s\"}\n", i, keys[i], values[i]);
-	}
-	printf("\n");
-}
-
-void
-Param::printHeader()
-{
-	for(unsigned int i = 0; i < keyz.size(); ++i)
-	{
-		printf("k_v[%d] = %s : %s\n", i, keyz[i].c_str(), valuez[i].c_str());
-	}
-	printf("\n");
+	printf("key:value = {\"%s\":\"%s\"}\n", key.c_str(), value.c_str());
 }
 
 int
-Param::getKeyAndValue(char * receiveBuffer)
+Param::getKeysAndValues(char * receiveBuffer, std::vector<Param *> & params)
 {	
 	try
 	{
@@ -84,180 +70,79 @@ Param::getKeyAndValue(char * receiveBuffer)
 			printf("No params.\n"); fflush(stdout);
 			return -1;
 		}
-		
-		// flags specifying whether characters are part of a key or a value
-		// set initial values to false
-		bool isKey = false;
-		bool isValue = false;
 
-		// first delete all allocated pointers, since vector::clear() does not do that for you
-		for(unsigned int i = 0; i < keys.size(); ++i)
+		// delete and clear the keys and values from the vector
+		for(unsigned int i = 0; i < params.size(); ++i)
 		{
-			free(keys[i]);
+			delete params[i];
 		}
-		for(unsigned int i = 0; i < values.size(); ++i)
-		{
-			free(values[i]);
-		}
-		// clear the keys and values vectors
-		keys.clear();
-		values.clear();
+		params.clear();
 
-		// allocate memory for a key and value pair with size paramSize
-		// throw exception if no memory could be allocated (returns nullptr)
-		char * key = (char *) calloc(paramSize, sizeof(char));
-		char * value = (char *) calloc(paramSize, sizeof(char));
-		if(key == nullptr)
-		{
-			throw "Could not allocate memory for key.";
-		}
-		if(value == nullptr)
-		{
-			throw "Could not allocate memory for value.";
-		}
-
-		// index within the key and value vectors
-		unsigned int key_vec_i = 0;
-		unsigned int value_vec_i = 0;
-
-		// index within the key and value char *'s
-		unsigned int key_i = 0;
-		unsigned int value_i = 0;
+		std::string k;
+		std::string v;
+		bool isKey = true;
 
 		// start reading from the beginning of the parameter list by subtracting the total 
 		// length of the receiveBuffer with the number of characters within the parameter list
 		// keep reading characters until the end of the receiveBuffer is reached
 		for(unsigned int i = (strlen(receiveBuffer) - count); i < strlen(receiveBuffer); i++)
 		{
-			if(isKey)
+			if( (receiveBuffer[i] == '{') || (receiveBuffer[i] == ' ') || (receiveBuffer[i] == '\t') || (receiveBuffer[i] == '\n') || (receiveBuffer[i] == '\"') || (receiveBuffer[i] == '\''))
 			{
-				// make sure program does not reach part where character is copied to key if
-				// index of key is equal to or surpasses the paramSize; program will attempt to
-				// write to memory out of bounds and the OS will terminate the process; program 
-				// will explode, maybe
-				if(key_i >= paramSize)
-				{
-					// free memory allocated for key and value
-					free(key);
-					free(value);
-					throw "Key size is too large.";
-				}
-				
-				// closing quotation mark of key; no more key characters;
-				// set isKey to false
-				if(receiveBuffer[i] == '\"')
-				{
-					isKey = false;
-					
-					// push empty char * to keys vector
-					// copy contents of key into empty char *
-					// reset key to 0
-					keys.push_back((char *) calloc(paramSize, sizeof(char)));
-					strcpy(keys[key_vec_i], key);
-					memset(key, 0, paramSize);
-
-					// increment keys vector index with one
-					// reset key index to 0
-					key_vec_i += 1;
-					key_i = 0;
-					
-					// skip rest of loop; return to top
-					continue;
-				}
-				
-				// convert character from buffer to lower case and add it to key
-				// increment key index with 1
-				key[key_i] = tolower(receiveBuffer[i]);
-				key_i += 1;
-			}
-			else if(isValue)
-			{
-				// make sure program does not reach part where character is copied to value if
-				// index of value is equal to or surpasses the paramSize; program will attempt to 
-				// write to memory out of bounds and the OS will terminate the process; program 
-				// will explode, maybe
-				if(value_i >= paramSize)
-				{
-					// free memory allocated for key and value
-					free(key);
-					free(value);
-					throw "Value size is too large.";
-				}
-				
-				// closing quotation mark of value; no more value characters;
-				// set isValue to false
-				if(receiveBuffer[i] == '\"')
-				{
-					isValue = false;
-					
-					// push empty char * to values vector
-					// copy contents of value into empty char *
-					// reset value to 0
-					values.push_back((char *) calloc(paramSize, sizeof(char)));
-					strcpy(values[value_vec_i], value);
-					memset(value, 0, paramSize);
-					
-					// increment values vector index with one
-					// reset value index to 0
-					value_vec_i += 1;
-					value_i = 0;
-
-					// skip rest of loop; return to top
-					continue;
-				}
-				
-				// convert character from buffer to lower case and add it to value
-				// increment value index with 1
-				value[value_i] = receiveBuffer[i];
-				//value[value_i] = tolower(receiveBuffer[i]);
-				value_i += 1;
-			}
-
-			// opening character for start of key
-			// set isKey to true and skip the following quotation mark by incrementing i with 1
-			if( (receiveBuffer[i] == '{') || (receiveBuffer[i] == ',') )
-			{
-				isKey = true;
-				i += 1;
-			}
-			// opening character for start of value
-			// set isValue to true and skip the following quotation mark by incrementing i with 1
-			else if(receiveBuffer[i] == ':')
-			{
-				isValue = true;
-				i += 1;
+				continue;
 			}
 			// ending character; no more keys or values; exit loop
 			else if(receiveBuffer[i] == '}')
 			{
+				if(k.size() && v.size())
+				{
+					params.push_back(new Param(k,v));
+				}
 				break;
 			}
+			else if(receiveBuffer[i] == ',')
+			{
+				isKey = true;
+				if(k.size() && v.size())
+				{
+					params.push_back(new Param(k,v));
+					k.clear();
+					v.clear();
+				}
+			}
+			// opening character for start of value
+			else if(receiveBuffer[i] == ':')
+			{
+				isKey = false;
+			}
+			else if(isKey)
+			{
+				k += tolower(receiveBuffer[i]);
+			}
+			else
+			{
+				v += receiveBuffer[i];
+			}
 		}
-		// free memory allocated for key and value
-		free(key);
-		free(value);
 	}
 	catch(const char * exception)
 	{
 		printf("Exception : %s\n", exception);
 		return -1;
-	}	
+	}
 	return 0;
 }
 
 int
-Param::getHeader(char * receiveBuffer)
-{
-	//printf("header size: %d\n", getHeaderSize(receiveBuffer));
-	
+Param::getHeader(char * receiveBuffer, std::vector<Param *> & params)
+{	
 	if(getHeaderSize(receiveBuffer) < 1)
 		return -1;
 	
-	keyz.clear();
-	valuez.clear();
+	params.clear();
 	
-	std::string key;
-	std::string value;
+	std::string k;
+	std::string v;
 	
 	bool isKey = true;
 	
@@ -293,12 +178,10 @@ Param::getHeader(char * receiveBuffer)
 		{
 			if(receiveBuffer[i] != ':')
 			{
-				key += (receiveBuffer[i]);
+				k += (receiveBuffer[i]);
 			}
 			else
 			{
-				keyz.push_back(key);
-				key.clear();
 				isKey = false;
 			}
 		}
@@ -307,22 +190,23 @@ Param::getHeader(char * receiveBuffer)
 			if(receiveBuffer[i] == ' ') continue;
 			if(receiveBuffer[i] != '\n')
 			{
-				value += (receiveBuffer[i]);
+				v += (receiveBuffer[i]);
 			}
 			else
 			{
-				valuez.push_back(value);
-				value.clear();
+				params.push_back(new Param(k,v));
+				k.clear();
+				v.clear();
 				isKey = true;
 			}
 		}
 	}
 	
-	for(unsigned int i = 0; i < keyz.size(); ++i)
+	for(unsigned int i = 0; i < params.size(); ++i)
 	{
-		if(strcmp("authorization",keyz[i].c_str())==0)
+		if(!strcmp("authorization",params[i]->key.c_str()))
 		{
-			printf("value: %s\n", valuez[i].c_str());
+			printf("value: %s\n", params[i]->value.c_str());
 		}
 	}
 	

@@ -15,6 +15,32 @@ class Param
 private:
 	unsigned int paramSize;
 	
+	static int getParamSize(char * receiveBuffer);
+	static int getHeaderSize(char * receiveBuffer);
+	
+public:
+	Param(std::string key, std::string value);
+	~Param();
+
+	std::string key;
+	std::string value;
+	
+	void print();
+	void printHeader();
+
+	static bool is_letter(char character);
+	static bool is_number(char character);
+	
+	static int getKeysAndValues(char * receiveBuffer, std::vector<Param *> & params);
+	static int getHeader(char * receiveBuffer, std::vector<Param *> & params);
+};
+
+/*
+class Param
+{
+private:
+	unsigned int paramSize;
+	
 	enum ASCII { STR_ZERO = 48, STR_NINE = 57, UNDER_SCORE = 95, LOWER_LETTER_A = 97, LOWER_LETTER_Z = 122 };
 	
 	bool is_letter(char character);
@@ -38,5 +64,6 @@ public:
 	int getKeyAndValue(char * receiveBuffer);
 	int getHeader(char * receiveBuffer);
 };
+*/
 
 #endif // PARAM_H

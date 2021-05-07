@@ -53,13 +53,13 @@ class WebServer : public Server
 	std::thread saveThread;
 	
 public:
-	WebServer(Socket & serverSocket, Socket & clientSocket, Param & param, const char * viewDir, const char * defaultFile);
+	WebServer(Socket & serverSocket, Socket & clientSocket, const char * viewDir, const char * defaultFile);
 	~WebServer();
 
 	enum Type { Post, Get, Put, Patch, Delete };
 
-	Param & param;
-	Param headers;
+	std::vector<Param *> params;
+	std::vector<Param *> headers;
 
 	void setHeaderSize(unsigned int headerSize);
 
@@ -72,12 +72,8 @@ public:
 	void getPage();
 	//
 	int getKeyAndValue();
-	int getHeader()
-	{
-		headers.getHeader(receiveBuffer);
-		//headers.printHeader();
-		return 0;
-	}
+	int getHeader();
+	
 	void processParam();
 	
 	void addGame(Game * game);

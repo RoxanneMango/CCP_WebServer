@@ -412,11 +412,11 @@ BlackJack::run()
 }
 
 std::string
-BlackJack::input(Param param)
+BlackJack::input(std::vector<Param *> & params)
 {
 	try
 	{
-		if(strcmp(param.keys[0], "start") == 0)
+		if(strcmp(params[0]->key.c_str(), "start") == 0)
 		{
 			if(running)
 				throw "GAME_ALREADY_RUNNING";
@@ -425,24 +425,24 @@ BlackJack::input(Param param)
 			init();
 			return "START";
 		}				
-		if(strcmp(param.keys[0], "stop") == 0)
+		if(strcmp(params[0]->key.c_str(), "stop") == 0)
 		{
 			if(!running)
 				throw "GAME_ALREADY_STOPPED";
 			running = false;
 			return "STOP";
 		}
-		if(strcmp(param.keys[0], "bet") == 0)
+		if(strcmp(params[0]->key.c_str(), "bet") == 0)
 		{
-			if( (param.keys.size() < 2) || (param.values.size() < 2) )
+			if(params.size() < 2)
 				throw "NOT_ENOUGH_PARAMS";
 			if(!running || state != State::BETTING)
 				throw "COULD_NOT_PLACE_BET";
-			if(atof(param.values[1]) <= 0)
+			if(atof(params[1]->value.c_str()) <= 0)
 				throw "BETTING_AMOUNT_INVALID";
-			if(atof(param.values[1]) > maxBettingAmount)
+			if(atof(params[1]->value.c_str()) > maxBettingAmount)
 				throw "BETTING_AMOUNT_TOO_MUCH";
-			if(atof(param.values[1]) > PLAYER->getBalance())
+			if(atof(params[1]->value.c_str()) > PLAYER->getBalance())
 				throw "NOT_ENOUGH_BALANCE";
 			
 			time_t timeOut = time(NULL) + 5; // 5 second timeout time
@@ -458,19 +458,19 @@ BlackJack::input(Param param)
 				throw "USER_NOT_READY";
 
 			PLAYER->isReady = false;
-			PLAYER->bettingAmount[0] = atof(param.values[1]);
+			PLAYER->bettingAmount[0] = atof(params[1]->value.c_str());
 			isReady = false;
 			return "OK";
 		}
-		if(strcmp(param.keys[0], "insure") == 0)
+		if(strcmp(params[0]->key.c_str(), "insure") == 0)
 		{
-			if( (param.keys.size() < 2) || (param.values.size() < 2) )
+			if(params.size() < 2)
 				throw "NOT_ENOUGH_PARAMS";
 			if(!running || state != State::INSURANCE)
 				throw "COULD_NOT_PLACE_INSURANCE";
-			if(atof(param.values[1]) <= 0)
+			if(atof(params[1]->value.c_str()) <= 0)
 				throw "INSURANCE_AMOUNT_INVALID";
-			if(atof(param.values[1]) > (PLAYER->bettingAmount[0] / 2))
+			if(atof(params[1]->value.c_str()) > (PLAYER->bettingAmount[0] / 2))
 				throw "INSURANCE_AMOUNT_TOO_BIG";
 
 			time_t timeOut = time(NULL) + 5; // 5 second timeout time
@@ -486,13 +486,13 @@ BlackJack::input(Param param)
 				throw "USER_NOT_READY";
 
 			PLAYER->isReady = false;
-			PLAYER->insuranceAmount = atof(param.values[1]);
+			PLAYER->insuranceAmount = atof(params[1]->value.c_str());
 			isReady = false;
 			return "OK";
 		}
-		if(strcmp(param.keys[0], "split") == 0)
+		if(strcmp(params[0]->key.c_str(), "split") == 0)
 		{
-			if( (param.keys.size() < 2) || (param.values.size() < 2) )
+			if(params.size() < 2)
 				throw "NOT_ENOUGH_PARAMS";
 			if(!running || state != State::SPLITTING)
 				throw "COULD_NOT_SPLIT_HAND";
@@ -502,7 +502,7 @@ BlackJack::input(Param param)
 			isReady = false;
 			return "OK";
 		}
-		if(strcmp(param.keys[0], "hit") == 0)
+		if(strcmp(params[0]->key.c_str(), "hit") == 0)
 		{
 			if(!running || state != State::HITTING)
 				throw "COULD_NOT_HIT_CARD";
@@ -514,7 +514,7 @@ BlackJack::input(Param param)
 			isReady = false;
 			return "HIT";
 		}
-		if(strcmp(param.keys[0], "stand") == 0)
+		if(strcmp(params[0]->key.c_str(), "stand") == 0)
 		{
 			if(!running || state != State::HITTING)
 				throw "COULD_NOT_STAND";
@@ -524,7 +524,7 @@ BlackJack::input(Param param)
 			isReady = false;
 			return "STAND";
 		}
-		if(strcmp(param.keys[0], "continue") == 0)
+		if(strcmp(params[0]->key.c_str(), "continue") == 0)
 		{
 			if(!running)
 				throw "GAME_NOT_RUNNING";
@@ -534,7 +534,7 @@ BlackJack::input(Param param)
 			isReady = false;
 			return "CONTINUE";
 		}
-		if(strcmp(param.keys[0], "surrender") == 0)
+		if(strcmp(params[0]->key.c_str(), "surrender") == 0)
 		{
 			if(!running)
 				throw "GAME_NOT_RUNNING";
@@ -544,7 +544,7 @@ BlackJack::input(Param param)
 			isReady = false;
 			return "SURRENDER";
 		}
-		if(strcmp(param.keys[0], "doubledown") == 0)
+		if(strcmp(params[0]->key.c_str(), "doubledown") == 0)
 		{
 			if(!running)
 				throw "GAME_NOT_RUNNING";
@@ -558,7 +558,7 @@ BlackJack::input(Param param)
 			isReady = false;
 			return "DOUBLE_DOWN";
 		}
-		if(strcmp(param.keys[0], "gethands") == 0)
+		if(strcmp(params[0]->key.c_str(), "gethands") == 0)
 		{
 			time_t timeOut = time(0) + 5; // 10 second timeout time
 			while( (!isReady || (state == State::BETTING)) )
@@ -576,7 +576,7 @@ BlackJack::input(Param param)
 			}
 			return getHands();
 		}
-		if(strcmp(param.keys[0], "getsettlement") == 0)
+		if(strcmp(params[0]->key.c_str(), "getsettlement") == 0)
 		{
 
 			time_t timeOut = time(0) + 5; // 5 second timeout time
@@ -594,7 +594,7 @@ BlackJack::input(Param param)
 			}
 			return std::to_string(PLAYER->getSettlement());
 		}
-		if(strcmp(param.keys[0], "getbettingamount") == 0)
+		if(strcmp(params[0]->key.c_str(), "getbettingamount") == 0)
 		{
 			time_t timeOut = time(0) + 5; // 5 second timeout time
 			while( (!isReady) )
@@ -611,7 +611,7 @@ BlackJack::input(Param param)
 			}
 			return (std::to_string(PLAYER->bettingAmount[0]));
 		}
-		if(strcmp(param.keys[0], "getinsuranceamount") == 0)
+		if(strcmp(params[0]->key.c_str(), "getinsuranceamount") == 0)
 		{
 			time_t timeOut = time(0) + 5; // 5 second timeout time
 			while( (!isReady) )
@@ -628,7 +628,7 @@ BlackJack::input(Param param)
 			}
 			return (std::to_string(PLAYER->insuranceAmount));
 		}
-		if(strcmp(param.keys[0], "getphase") == 0)
+		if(strcmp(params[0]->key.c_str(), "getphase") == 0)
 		{
 			if(!running)
 				return "-1";
@@ -643,7 +643,7 @@ BlackJack::input(Param param)
 			}
 			return std::to_string(state);
 		}
-		if(strcmp(param.keys[0], "getturn") == 0)
+		if(strcmp(params[0]->key.c_str(), "getturn") == 0)
 		{
 			time_t timeOut = time(0) + 5; // 5 second timeout time
 			while( (!isReady) )
@@ -660,7 +660,7 @@ BlackJack::input(Param param)
 			}
 			return (std::to_string(userTurnIndex));
 		}
-		if(strcmp(param.keys[0], "ack") == 0)
+		if(strcmp(params[0]->key.c_str(), "ack") == 0)
 		{
 			if(!running)
 				return "-1";

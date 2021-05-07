@@ -29,7 +29,7 @@ public:
 		return user;
 	}
 
-	virtual std::string input(Param param) = 0;
+	virtual std::string input(std::vector<Param *> & params) = 0;
 	
 	virtual void init() = 0;
 	virtual void run() = 0;
