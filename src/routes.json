@@ -1,0 +1,30 @@
+{
+	default:	"index.html", 		1;
+	register:	"register.html",	1;
+	login:		"login.html", 		1;
+	home:		"home.html",		0;
+	blackjack: 	"black_jack.html", 	0;
+	about: 		"about.html", 		1;
+	user: 		"user.html", 		0;
+}
+
+{
+	style:		"style.css",		1;
+}
+
+{
+	auth:		"auth.js",			1;
+	loggedIn:	"loggedIn.js",		1;
+	login:		"login.js",			1;
+	logout:		"logout.js",		1;
+	getName:	"get_name.js",		0;
+	user:		"user.js",			0;
+	blackjack:	"black_jack.js",	0;
+	getBalance:	"get_balance.js",	0;
+	authHome:	"auth_home.js",		0;
+	register:	"register.js",		1;
+}
+
+{
+	test:		"test.js",			0;
+}

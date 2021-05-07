@@ -5,7 +5,7 @@
 
 #include "user.h"
 #include "chip.h"
-#include "card.h"
+#include "card_hand.h"
 
 class BlackjackUser : public User
 {
@@ -16,11 +16,27 @@ public:
 	
 	virtual ~BlackjackUser();
 
-	std::vector<Chip> chips;
-	std::vector<Card> hand[2];
+	// The ---- --- of flags
+	bool isSplit = false;
+	bool isDoubleDown = false;
+	bool isNatural = false;
+	bool isSurrender = false;
+	bool isHit = false;
+	bool isStand = false;
+	//
+	bool canSplit = false;
+	bool canInsurance = false;
+	//
+	bool isWon[2] = {0};
+	bool isLose[2] = {0};
 
-	double bettingAmount = 0;
+	double bettingAmount[2] = {0};
 	double insuranceAmount = 0;
+
+	void resetFlags();
+
+	std::vector<Chip> chips;
+	CardHand hand[2];
 	
 	//
 	void addChips(BlackjackUser & user, Chip chip);
@@ -28,7 +44,9 @@ public:
 	//
 	void resetHand();
 	
-	double getBettingAmount();
+	double getBettingAmount(unsigned int hand);
+	
+	int getSettlement();
 	
 	static BlackjackUser * create(User & user)
 	{

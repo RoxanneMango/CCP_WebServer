@@ -3,7 +3,7 @@ window.addEventListener('load', () => test());
 function test()
 {
 	getTest();
-	document.getElementById("test").addEventListener("click", getName);
+	document.getElementById("test").addEventListener("click", getTest);
 }
 
 async function getTest()
@@ -18,7 +18,8 @@ async function getTest()
 	await fetch( url, {
 		method: 'GET',
 		headers: new Headers({
-			'Authorization': 'Basic ' + sessionStorage.getItem('token')
+			'Authorization': sessionStorage.getItem('token')
+//			'Authorization': 'Basic ' + sessionStorage.getItem('token')
 //			'Authorization': 'Basic '+btoa('username:password'), 
 		})
 	})

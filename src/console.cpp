@@ -60,6 +60,12 @@ Console::process()
 	{
 		webServer.save();
 	}
+	else if(!strcmp(command, "help"))
+	{
+		printf("> I am sorry but you are on your own\n");
+	}
 	else
-		printf("[!] Unknown command.\n");
+	{
+		printf("[!] Unknown command\n");
+	}
 }

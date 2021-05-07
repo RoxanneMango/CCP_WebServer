@@ -9,6 +9,10 @@
 #include "blackjack_user.h"
 #include "dealer.h"
 
+#define USER ((User *)(users[0]))
+#define PLAYER ((BlackjackUser *)(users[0]))
+#define PLAYERS(i) ((BlackjackUser *)(users[i]))
+
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *\
 *
 * -=- Blackjac++ gameplay -=-
@@ -110,42 +114,22 @@
 *
 * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-
 class BlackJack : public Game
 {
 private:	
 	std::thread thread;
 	
 	bool running = false;
-	//
 	bool isReady = false;
 	bool isDone = false;
-	//
-	bool isSplit = false;
-	bool isDoubleDown = false;
-	bool isNatural = false;
-	bool isSurrender = false;
-	bool isHit = false;
-	bool isStand = false;
-	//
-	bool canSplit = false;
-	bool canInsurance = false;
-	//
-	bool isWon[2] = {0};
-	bool isLose[2] = {0};
-	
+
 	int userTurnIndex = 0;
-	
+	double maxBettingAmount = 4000;
+
 	unsigned int numOfDecks;
 	std::vector<DeckOfCards> cardDecks;
-	
-	Dealer * dealer;
-	
-	std::vector<double> bets;
 
-	double maxBettingAmount = 4000;
-	double bettingAmount[2] = {0};
-	double insuranceAmount = 0;
+	Dealer * dealer;
 	
 	void bettingPhase();
 	void dealingPhase();
@@ -154,15 +138,11 @@ private:
 	void hittingPhase();
 	void settlementPhase();
 	
-	unsigned int currentUserId;
-	
 	enum State { BETTING = 0, DEALING, INSURANCE, SPLITTING, HITTING, SETTLEMENT };
-	
 	State state = State::BETTING;
 	
 	Card getCard();
 	std::string getHands();
-	int getSettlement();
 
 public:
 	BlackJack(int id, unsigned int numOfDecks);

@@ -3,9 +3,9 @@
 
 #include "stdio.h"
 #include "memory.h"
+#include "thread.h"
 
 #include "web_server.h"
-#include "thread.h"
 
 class Console
 {

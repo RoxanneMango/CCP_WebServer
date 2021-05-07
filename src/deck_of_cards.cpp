@@ -68,6 +68,7 @@ void
 DeckOfCards::addCard(Card card)
 {
 	deck.push_back(card);
+	numOfCards += 1;
 }
 
 Card
@@ -75,6 +76,7 @@ DeckOfCards::getCard()
 {
 	Card card = deck[deck.size()-1];
 	deck.pop_back();
+	numOfCards -= 1;
 	return card;
 }
 
@@ -83,6 +85,7 @@ DeckOfCards::getCard(unsigned int index)
 {
 	Card card = deck[index];
 	deck.erase(deck.begin() + index);
+	numOfCards -= 1;
 	return card;
 }
 
@@ -94,6 +97,7 @@ DeckOfCards::getRandomCard()
 	int index = rand() % numOfCards;
 	Card card = deck[index];
 	deck.erase(deck.begin() + index);
+	numOfCards -= 1;
 	
 	return card;
 }

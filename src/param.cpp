@@ -18,6 +18,25 @@ Param::is_number(char character)
 }
 
 int
+Param::getHeaderSize(char * receiveBuffer)
+{
+	int size = strlen(receiveBuffer);
+	int count = 0;
+	for(int i = 0; i < size; ++i)
+	{
+		if(i+1 != size)
+		{
+			if((receiveBuffer[i] == '\n') && (receiveBuffer[i+1] == '\n'))
+			{
+				break;
+			}
+		}
+		count += 1;
+	}
+	return count;	
+}
+
+int
 Param::getParamSize(char * receiveBuffer)
 {	
 	// start at end of receiveBuffer and keep counting backwards until encountering a new line
@@ -37,6 +56,16 @@ Param::print()
 	for(unsigned int i = 0; i < keys.size(); ++i)
 	{
 		printf("key_value[%d] = {\"%s\":\"%s\"}\n", i, keys[i], values[i]);
+	}
+	printf("\n");
+}
+
+void
+Param::printHeader()
+{
+	for(unsigned int i = 0; i < keyz.size(); ++i)
+	{
+		printf("k_v[%d] = %s : %s\n", i, keyz[i].c_str(), valuez[i].c_str());
 	}
 	printf("\n");
 }
@@ -213,5 +242,89 @@ Param::getKeyAndValue(char * receiveBuffer)
 		printf("Exception : %s\n", exception);
 		return -1;
 	}	
+	return 0;
+}
+
+int
+Param::getHeader(char * receiveBuffer)
+{
+	//printf("header size: %d\n", getHeaderSize(receiveBuffer));
+	
+	if(getHeaderSize(receiveBuffer) < 1)
+		return -1;
+	
+	keyz.clear();
+	valuez.clear();
+	
+	std::string key;
+	std::string value;
+	
+	bool isKey = true;
+	
+	// skip request
+	int size = getHeaderSize(receiveBuffer);
+	int skip = 0;
+	bool isDone = false;
+	for(int i = 0; i < size && !isDone; ++i)
+	{
+		if(receiveBuffer[i] == ':')
+		{
+			do
+			{
+				if(receiveBuffer[i] == '\n')
+				{
+					skip += 1;
+					isDone = true;
+					break;
+				}
+				skip -= 1;
+				i -= 1;
+			} while(i >= 0);
+		}
+		else
+		{
+			skip += 1;
+		}
+	}
+	
+	for(int i = skip; i < size; ++i)
+	{
+		if(isKey)
+		{
+			if(receiveBuffer[i] != ':')
+			{
+				key += (receiveBuffer[i]);
+			}
+			else
+			{
+				keyz.push_back(key);
+				key.clear();
+				isKey = false;
+			}
+		}
+		else
+		{
+			if(receiveBuffer[i] == ' ') continue;
+			if(receiveBuffer[i] != '\n')
+			{
+				value += (receiveBuffer[i]);
+			}
+			else
+			{
+				valuez.push_back(value);
+				value.clear();
+				isKey = true;
+			}
+		}
+	}
+	
+	for(unsigned int i = 0; i < keyz.size(); ++i)
+	{
+		if(strcmp("authorization",keyz[i].c_str())==0)
+		{
+			printf("value: %s\n", valuez[i].c_str());
+		}
+	}
+	
 	return 0;
 }

@@ -9,7 +9,7 @@
 
 int
 main(int argc, char ** argv)
-{	
+{
 //	const char * ipAddress	= 	"192.168.1.9";
 	const char * ipAddress	= 	"127.0.0.1";
 	unsigned short port		=	44900;
@@ -36,7 +36,8 @@ main(int argc, char ** argv)
 	server.addDatabase(&database);
 	server.addGame(&blackJack);
 	
-	Console console(server, 32);
+	unsigned int consoleBufferSize = 32;
+	Console console(server, consoleBufferSize);
 
 	for(;;)
 	{
@@ -45,19 +46,20 @@ main(int argc, char ** argv)
 
 		server.readSocket();
 		
-		//server.printRequestFirstLine(); printf("\n"); fflush(stdout);
-		server.printRequest(400); printf("\n"); fflush(stdout);
+//		server.printRequest(); printf("\n"); fflush(stdout);
 		
 		switch(server.checkRequestType())
 		{
 			case WebServer::Type::Get:
 			{
+				server.getHeader();
 				server.getPage();
 				break;
 			}
 			case WebServer::Type::Post:
 			{
 				//server.param.print();
+				server.getHeader();
 				server.processParam();
 				break;
 			}

@@ -10,6 +10,7 @@
 #include "server.h"
 #include "sleep.h"
 #include "thread.h"
+#include "route.h"
 
 class WebServer : public Server
 {
@@ -17,6 +18,7 @@ class WebServer : public Server
 	//
 	const char * OK_RESPONSE = "HTTP/1.0 200 OK\r\n";
 	const char * FORBIDDEN_RESPONSE = "HTTP/1.0 403 forbidden\r\n";
+	const char * NOT_FOUND_RESPONSE = "HTTP/1.0 404 not found\r\n";
 	const char * TP_RESPONSE = "HTTP/1.0 418 I'm a teapot\r\n";
 
 	const char * PREFIX = "view/";
@@ -42,10 +44,10 @@ class WebServer : public Server
 	unsigned int maxUsers = 5;
 	std::vector<User *> users;
 	
+	std::vector<Route *> routes;
+	
 	void clearBuffers();
 	void resizeHeader();
-	
-	bool isPublic(char * fileName);
 	
 	void saveTimer();
 	std::thread saveThread;
@@ -57,6 +59,7 @@ public:
 	enum Type { Post, Get, Put, Patch, Delete };
 
 	Param & param;
+	Param headers;
 
 	void setHeaderSize(unsigned int headerSize);
 
@@ -69,6 +72,12 @@ public:
 	void getPage();
 	//
 	int getKeyAndValue();
+	int getHeader()
+	{
+		headers.getHeader(receiveBuffer);
+		//headers.printHeader();
+		return 0;
+	}
 	void processParam();
 	
 	void addGame(Game * game);
@@ -80,11 +89,10 @@ public:
 	bool verifyUser(std::string token, std::string ip);
 	
 	void save();
+	void reload();
 	
-	void reload()
-	{
-		printf("> Reload complete.\n");
-	}
+	bool authenticate();
+	
 };
 
 #endif // WEB_SERVER_H

@@ -3,7 +3,8 @@
 WebServer::WebServer( Socket & serverSocket, Socket & clientSocket, Param & param, const char * viewDir, const char * defaultFile) :
 	Server(serverSocket, clientSocket),
 	fileIO(viewDir, defaultFile),
-	param(param)
+	param(param),
+	headers(128)
 {	
 	// default headerSize
 	this->headerSize = 255;
@@ -13,6 +14,8 @@ WebServer::WebServer( Socket & serverSocket, Socket & clientSocket, Param & para
 	
 	RESPONSE = (char *) calloc(64, sizeof(char));
 	strcpy(RESPONSE, "HTTP/1.0 200 OK\r\n");
+	
+	RouteFactory::load(routes, "src/routes.json");
 	
 	try
 	{
@@ -43,7 +46,7 @@ WebServer::save()
 	if(!databases[selectedDatabase]->isBusy)
 	{
 		databases[selectedDatabase]->save(users);
-		printf("> Save successful.\n");
+		printf("> Save successful\n");
 	}
 	else
 	{
@@ -125,23 +128,23 @@ int
 WebServer::checkRequestType()
 {
 	int type;
-	if(strncmp(receiveBuffer, "POST", 4) == 0)
+	if(!strncmp(receiveBuffer, "POST", 4))
 	{
 		type = Post;
 	}
-	else if(strncmp(receiveBuffer, "GET", 3) == 0)
+	else if(!strncmp(receiveBuffer, "GET", 3))
 	{
 		type = Get;
 	}
-	else if(strncmp(receiveBuffer, "PUT", 3) == 0)
+	else if(!strncmp(receiveBuffer, "PUT", 3))
 	{
 		type = Put;
 	}
-	else if(strncmp(receiveBuffer, "PATCH", 5) == 0)
+	else if(!strncmp(receiveBuffer, "PATCH", 5))
 	{
 		type = Patch;
 	}
-	else if(strncmp(receiveBuffer, "DELETE", 6) == 0)
+	else if(!strncmp(receiveBuffer, "DELETE", 6))
 	{
 		type = Delete;
 	}
@@ -155,9 +158,11 @@ WebServer::checkRequestType()
 void
 WebServer::getPage()
 {
-	// make pointer which points to start of receiveBuffer and initialize fileNameSize to 0
+	// make pointer which points to start of receiveBuffer
 	char * receiveBuffer_ptr = receiveBuffer;
-	unsigned int fileNameSize = 0;
+	
+	std::string filePath = std::string(PREFIX);
+	std::string fileName;
 
 	// skip through receiveBuffer until '/' is reached
 	while(*receiveBuffer_ptr != '/')
@@ -166,27 +171,16 @@ WebServer::getPage()
 	}
 	// step over '/'
 	receiveBuffer_ptr++;
-	
-	// step through receiveBuffer and increment fileNameSize with 1 until a whitespace is reached
+
+	// step through receiveBuffer until a whitespace is reached
 	while(*receiveBuffer_ptr != ' ')
 	{
+		fileName += *receiveBuffer_ptr;
 		receiveBuffer_ptr++;
-		fileNameSize += 1;
 	}
 
-	// create a new string called fileName with size of fileNameSize+1 (for null termination character)
-	char * fileName = (char *) calloc(fileNameSize+1, sizeof(char));
-	
-	// receiveBuffer_ptr - fileNameSize rewinds the pointer to the start of the file name
-	// copy contents of receiveBuffer_ptr into fileName, starting at beginning of fileName and ending at fileNameSize
-	// pass fileName into fileIO class to retrieve contents of file
-
-	strncpy(fileName, (receiveBuffer_ptr - fileNameSize), fileNameSize);
-	
-	
-	char * filePath = (char *) calloc(fileNameSize + strlen(PREFIX) + 1, sizeof(char));
-	strcpy(filePath, PREFIX);
-	strcat(filePath, fileName);
+	// append file name to default path
+	filePath.append(fileName);
 	
 	// receiveBuffer_ptr is at end of file name; get to the start of 'css' file extension by taking 3 steps back
 	// if file extension is 'css' (cascading style sheet), set content-type to text/css
@@ -199,49 +193,61 @@ WebServer::getPage()
 	// if server requests a file that is not favicon.ico, try to get file
 	// if server requests favicon.ico, and hasFavicon is set to true, try to get file
 	// requests for favicon.ico will be ignored if hasFavicon is false to avoid exception spam
-	if( strcmp(fileName, "favicon.ico") || (!(strcmp(fileName, "favicon.ico")) && (hasFavicon)) )
+	if( strcmp(fileName.c_str(), "favicon.ico") || (!(strcmp(fileName.c_str(), "favicon.ico")) && (hasFavicon)) )
 	{
-		// if it is not a public page, verify user based on ip address
-		// if the user is verified, serve page, otherwise give error 403 : forbidden
-		if(isPublic(fileName))
+		// check if page is registered
+		bool pageExists = false;
+		bool isPublic = false;
+		if(fileName.size())
 		{
-			// get page
-			buffer.assign(fileIO.getFileContent(filePath));
+			for(unsigned int i = 0; i < routes.size(); ++i)
+			{
+				if(!strcmp(routes[i]->url.c_str(), fileName.c_str()) || !(strcmp(routes[i]->PATH.c_str(), fileName.c_str())))
+				{
+					pageExists = true;
+					isPublic = routes[i]->isPublic;
+					break;
+				}
+			}
 		}
 		else
 		{
-			for(unsigned int i = 0; i < users.size(); ++i)
+			for(unsigned int i = 0; i < routes.size(); ++i)
 			{
-				if(users[i]->getIp() == clientSocket.getIpAddress())
+				if(!strcmp(routes[i]->url.c_str(), "default"))
 				{
-					buffer.assign(fileIO.getFileContent(filePath));
-					free(fileName);
-					return;
+					pageExists = true;
+					isPublic = routes[i]->isPublic;
+					break;
 				}
 			}
-			strcpy(RESPONSE, FORBIDDEN_RESPONSE);
+		}
+		if(pageExists)
+		{
+			// if it is not a public page, verify user based on ip address
+			// if the user is verified, serve page, otherwise give error 403 : forbidden
+			if(isPublic)
+			{
+				// get page
+				buffer.assign(fileIO.getFileContent(filePath.c_str()));
+			}
+			else
+			{
+				if(authenticate())
+				{
+					buffer.assign(fileIO.getFileContent(filePath.c_str()));
+				}
+				else
+				{
+					strcpy(RESPONSE, FORBIDDEN_RESPONSE);
+				}
+			}
+		}
+		else
+		{
+			strcpy(RESPONSE, NOT_FOUND_RESPONSE);
 		}
 	}
-	// free the allocated memory of fileName
-	free(fileName);
-}
-
-bool
-WebServer::isPublic(char * fileName)
-{
-	// retrieve public pages from server, ideally . . .
-	if(!(strlen(fileName))) return true;
-	if(!(strcmp(fileName, "index.html"))) return true;
-	if(!(strcmp(fileName, "login.html"))) return true;
-	if(!(strcmp(fileName, "login.js"))) return true;
-	if(!(strcmp(fileName, "loggedIn.js"))) return true;
-	if(!(strcmp(fileName, "register.html"))) return true;
-	if(!(strcmp(fileName, "register.js"))) return true;
-	if(!(strcmp(fileName, "auth.js"))) return true;
-	if(!(strcmp(fileName, "user.js"))) return true;
-	if(!(strcmp(fileName, "style.css"))) return true;
-	
-	return false;
 }
 
 void
@@ -577,6 +583,30 @@ WebServer::verifyUser(std::string token, std::string ip)
 	for(unsigned int i = 0; i < users.size(); ++i)
 	{
 		if( (users[i]->getToken() == token) && (users[i]->getIp() == ip) )
+		{
+			return true;
+		}
+	}
+	return false;
+}
+
+void
+WebServer::reload()
+{
+	RouteFactory::load(routes, "src/routes.json");
+//	for(unsigned int i = 0; i < routes.size(); ++i)
+//	{
+//		printf("%s : %s : %d;\n", routes[i]->url.c_str(), routes[i]->PATH.c_str(), routes[i]->isPublic);
+//	}
+	printf("> Reload complete\n");
+}
+
+bool
+WebServer::authenticate()
+{
+	for(unsigned int i = 0; i < users.size(); ++i)
+	{
+		if(users[i]->getIp() == clientSocket.getIpAddress())
 		{
 			return true;
 		}

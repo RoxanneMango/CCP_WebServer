@@ -4,10 +4,12 @@ BlackJack::BlackJack(int id, unsigned int numOfDecks) :
 	Game(id), numOfDecks(numOfDecks)
 {
 	name = "Black Jack";
-	minUsers = 1;
-	currentUsers = 0;
-	maxUsers = 1;
 	running = false;
+
+	currentUsers = 0;
+	minUsers = 1;
+	maxUsers = 1;
+
 	maxBettingAmount = 4000;
 }
 BlackJack::~BlackJack()
@@ -23,103 +25,23 @@ BlackJack::getCard()
 
 std::string
 BlackJack::getHands()
-{
-	// SUIT
-	// 0 H
-	// 1 C
-	// 2 D
-	// 3 S
-	
-	// PICTURE
-	// 0 NONE
-	// 1 J
-	// 2 Q
-	// 3 K
-	// 4 A
-	
+{	
 	// split on ; to get individual player hands
 	// split on : to get individual player cards, where index 0 is always player name
 	// split on , to get individual player card info (value, suit, true value)
 	// <name>:<value/picture>,<suit>,<true_value>:<value/picture>,<suit>,<true_value>;<name>,<value/picture>,<suit>,<true_value>
-	
 	std::string hands;
 	for(unsigned int i = 0; i < users.size(); ++i)
 	{
-		if(((BlackjackUser *)(users[i]))->hand[0].size() == 0) return "!OK";
-
-		hands.append(((BlackjackUser *)(users[i]))->getName());
+		if(PLAYERS(i)->hand[0].size() == 0) return "!OK";
+		hands.append(PLAYERS(i)->getName());
 		hands.append(":");
-		
-		for(unsigned int k = 0; k < (1 + (((BlackjackUser *)(users[i]))->hand[1].size() > 0)); ++k)
+		for(unsigned int k = 0; k < (1 + (PLAYERS(i)->hand[1].size() > 0)); ++k)
 		{
-			for(unsigned int j = 0; j < ((BlackjackUser *)(users[i]))->hand[k].size(); ++j)
-			{
-				int pv = ((BlackjackUser *)(users[i]))->hand[k][j].getPictureValue();
-				int sv = ((BlackjackUser *)(users[i]))->hand[k][j].getSuitValue();
-
-				// Second card dealt is face down -- hidden
-				if(((BlackjackUser *)(users[i]))->hand[k][j].isHidden())
-				{
-					hands.append(std::string("hidden"));
-					continue;
-				}
-				
-				if(pv==0) hands.append(std::to_string(((BlackjackUser *)(users[i]))->hand[k][j].getValue()));
-				else hands.append(pv==1?"J":pv==2?"Q":pv==3?"K":"A");
-				hands.append(",");
-				hands.append(sv==0?"H":sv==1?"C":sv==2?"D":"S");
-				hands.append(",");
-				hands.append(std::to_string(((BlackjackUser *)(users[i]))->hand[k][j].getValue()));
-				if(j+1 != ((BlackjackUser *)(users[i]))->hand[k].size()) hands.append(":");
-			}
-			hands.append(";");
+			hands.append(PLAYERS(i)->hand[k].toString());
 		}
 	}
-	printf("hands: %s\n", &hands[0]);
 	return hands;
-}
-
-int
-BlackJack::getSettlement()
-{
-	// -1	not settled
-	//
-	//	0	loss
-	//	1	win
-	//	2	draw
-	//	3	loss loss
-	//	4	draw loss
-	//	5	loss draw
-	//	6	draw draw
-	//	7	win loss
-	//	8	loss win
-	//	9	win win
-	
-	if(!((BlackjackUser *)(users[0]))->hand[1].size())
-	{
-		if( isLose[0] && !isWon[0] )
-			return 0;
-		if( !isLose[0] && isWon[0] )
-			return 1;
-		return 2;
-	}
-	else
-	{
-		if( isLose[0] && isLose[1] && !isWon[0] && !isWon[1] )
-			return 3;
-		if( isLose[0] && isWon[0] && isLose[1] && !isWon[1] )
-			return 4;
-		if( isLose[0] && !isWon[0] && isLose[1] && isWon[1] )
-			return 5;
-		if( isLose[0] && isLose[1] && isWon[0] && isWon[1] )
-			return 6;
-		if( !isLose[0] && isWon[0] && !isWon[1] && isLose[1] )
-			return 7;
-		if( isLose[0] && !isWon[0] && isWon[1] && !isLose[1] )
-			return 8;
-	}
-	return 9;
-//	else( (!isLose[0] && !isLose[1]) && (isWon[0] && isWon[1]) )
 }
 
 void
@@ -131,30 +53,19 @@ BlackJack::init()
 	{
 		cardDecks.push_back(DeckOfCards());
 	}
-
 	dealer = Dealer::create(&cardDecks, &this->numOfDecks);
 	users.push_back(dealer);
-	
+
 	dealer->shuffle();
 
+	userTurnIndex = 0;
 	running = true;
-	//
-	isNatural = false;
-	isDoubleDown = false;
-	isSplit = false;
-	isSurrender = false;
-	isWon[0] = false;
-	isWon[1] = false;
-	isLose[0] = false;
-	isLose[1] = false;
 	isDone = false;
-	isHit = false;
-	isStand = false;
 	//
-	canSplit = false;
-	canInsurance = false;
+	PLAYER->resetFlags();
+	PLAYER->resetHand();
 
-	((BlackjackUser *)(users[0]))->resetHand();
+	dealer->resetFlags();
 	dealer->resetHand();
 
 	try
@@ -170,8 +81,8 @@ BlackJack::init()
 		printf("Exception: %s\n", exception.what());
 		return;
 	}
+	
 	state = State::BETTING;
-	userTurnIndex = 0;
 	isReady = true;
 }
 
@@ -180,11 +91,9 @@ BlackJack::bettingPhase()
 {
 	if(!isReady)
 	{
-		if(bettingAmount[0] > 0.00)
+		if(PLAYER->bettingAmount[0] > 0.00)
 		{
-			printf("Bet placed: %.2f\n", bettingAmount[0]); fflush(stdout);
-			((User *)(users[0]))->subtractBalance(bettingAmount[0]);
-			printf("New balance: %.2f\n", ((BlackjackUser *)(users[0]))->getBalance());
+			USER->subtractBalance(PLAYER->bettingAmount[0]);
 			isDone = true;
 		}
 		isReady = true;
@@ -192,7 +101,7 @@ BlackJack::bettingPhase()
 	if(isDone)
 	{
 		state = State::DEALING;
-		((User *)(users[0]))->isReady = true;
+		USER->isReady = true;
 		isReady = false;
 	}
 }
@@ -200,52 +109,33 @@ BlackJack::bettingPhase()
 void
 BlackJack::dealingPhase()
 {
-	
 	if(!isReady)
 	{
-		printf("Dealing phase . . .\n");
-		
 		dealer->deal(&users);
-		for(unsigned int i = 0; i < users.size(); ++i)
-		{
-			for(unsigned int j = 0; j < ((BlackjackUser *)(users[i]))->hand[0].size(); ++j)
-			{
-				((BlackjackUser *)(users[i]))->hand[0][j].print();
-				printf("\n");
-			}
-			for(unsigned int j = 0; j < ((BlackjackUser *)(users[i]))->hand[0].size(); ++j)
-			{
-				((BlackjackUser *)(users[i]))->hand[0][j].print();
-				printf("\n");
-			}
-			printf("\n");
-		}
-
-		canSplit = ((BlackjackUser *)(users[0]))->hand[0][0] == ((BlackjackUser *)(users[0]))->hand[0][1];
-		canInsurance = (dealer->hand[0][0].getValue() == 11);
-		isNatural = ((((BlackjackUser *)(users[0]))->hand[0][0].getValue() + ((BlackjackUser *)(users[0]))->hand[0][1].getValue()) == 21);
+		
+		PLAYER->canSplit = PLAYER->hand[0][0] == PLAYER->hand[0][1];
+		PLAYER->canInsurance = (dealer->hand[0][0].getValue() == 11);
+		PLAYER->isNatural = ((PLAYER->hand[0][0].getValue() + PLAYER->hand[0][1].getValue()) == 21);
 		
 		isDone = (dealer->hand[0][0].getValue() != 11);
 		isReady = true;
 	}
-	if(isNatural)
+	if(PLAYER->isNatural)
 	{
 		isDone = false;
 		isReady = false;
 		state = State::SETTLEMENT;
 	}
-	else if(canInsurance)
+	else if(PLAYER->canInsurance)
 	{
-		printf("INSURANCE!\n");
 		isDone = false;
 		state = State::INSURANCE;
 	}
 	else if(isDone)
 	{	
 		isDone = false;
-		if(canSplit)
+		if(PLAYER->canSplit)
 		{
-			printf("SPLITTING!\n");
 			state = State::SPLITTING;
 		}
 		else
@@ -264,10 +154,10 @@ BlackJack::insurancePhase()
 		dealer->revealCard();
 		if(((dealer->hand[0][0].getValue() + dealer->hand[0][1].getValue()) == 21))
 		{
-			((User *)(users[0]))->isReady = false;
+			USER->isReady = false;
 			state = State::SETTLEMENT;
 		}
-		else if(canSplit)
+		else if(PLAYER->canSplit)
 		{
 			state = State::SPLITTING;
 			isReady = true;
@@ -279,13 +169,12 @@ BlackJack::insurancePhase()
 	}
 	else if(!isReady)
 	{
-		if(insuranceAmount > 0.00)
+		if(PLAYER->insuranceAmount > 0.00)
 		{
 			isDone = true;
 			isReady = false;
-			printf("Insurance Bet placed: %.2f\n", insuranceAmount); fflush(stdout);
-			((User *)(users[0]))->subtractBalance(insuranceAmount);
-			((User *)(users[0]))->isReady = true;
+			USER->subtractBalance(PLAYER->insuranceAmount);
+			USER->isReady = true;
 		}
 		else
 		{
@@ -297,14 +186,14 @@ BlackJack::insurancePhase()
 void
 BlackJack::splittingPhase()
 {	
-	if(isSplit)
+	if(PLAYER->isSplit)
 	{
-		if(((User *)(users[0]))->getBalance() >= bettingAmount[0])
+		if(USER->getBalance() >= PLAYER->bettingAmount[0])
 		{
-			bettingAmount[1] = bettingAmount[0];
-			((User *)(users[0]))->subtractBalance(bettingAmount[1]);
+			PLAYER->bettingAmount[1] = PLAYER->bettingAmount[0];
+			USER->subtractBalance(PLAYER->bettingAmount[1]);
 		}
-		dealer->split(((BlackjackUser *)(users[0])));
+		dealer->split(PLAYER);
 		isReady = true;
 		isDone = true;
 	}
@@ -318,41 +207,36 @@ BlackJack::splittingPhase()
 void
 BlackJack::hittingPhase()
 {
-	if(isDoubleDown)
+	if(PLAYER->isDoubleDown)
 	{
-		((User *)(users[0]))->subtractBalance(bettingAmount[userTurnIndex]);
-		bettingAmount[userTurnIndex] *= 2;
-		dealer->dealCard(((BlackjackUser *)(users[0])), userTurnIndex);
+		USER->subtractBalance(PLAYER->bettingAmount[userTurnIndex]);
+		PLAYER->bettingAmount[userTurnIndex] *= 2;
+		dealer->dealCard(PLAYER, userTurnIndex);
 		userTurnIndex += 1;
-		isDone = (userTurnIndex > (((BlackjackUser *)(users[0]))->hand[1].size() ? 1 : 0));
+		isDone = (userTurnIndex > (PLAYER->hand[1].size() ? 1 : 0));
 	}
-	else if(isSurrender)
+	else if(PLAYER->isSurrender)
 	{
-		isSurrender = false;
-		((User *)(users[0]))->addBalance(bettingAmount[userTurnIndex] / 2);
-		isLose[userTurnIndex] = true;
+		PLAYER->isSurrender = false;
+		USER->addBalance(PLAYER->bettingAmount[userTurnIndex] / 2);
+		PLAYER->isLose[userTurnIndex] = true;
 		userTurnIndex += 1;
-		isDone = (userTurnIndex > (((BlackjackUser *)(users[0]))->hand[1].size() ? 1 : 0));
+		isDone = (userTurnIndex > (PLAYER->hand[1].size() ? 1 : 0));
 	}
-	else if(isHit)
+	else if(PLAYER->isHit)
 	{
-		isHit = false;
-		if((userTurnIndex == 0) || (userTurnIndex == 1 && ((BlackjackUser *)(users[0]))->hand[1].size()))
+		PLAYER->isHit = false;
+		if((userTurnIndex == 0) || (userTurnIndex == 1 && PLAYER->hand[1].size()))
 		{
-			dealer->dealCard(((BlackjackUser *)(users[0])), userTurnIndex);
-			int sum = 0;
-			for(Card card : ((BlackjackUser *)(users[0]))->hand[userTurnIndex])
-			{
-				sum += card.getValue();
-			}
-			if(sum > 21)
+			dealer->dealCard(PLAYER, userTurnIndex);
+			if(PLAYER->hand[userTurnIndex] > 21)
 			{
 				bool canLowerAce = false;
-				for(Card & card : ((BlackjackUser *)(users[0]))->hand[userTurnIndex])
+				for(Card & card : PLAYER->hand[userTurnIndex])
 				{
-					if(card.getPicture() == 'A')
+					if(card == 'A')
 					{
-						if(card.getValue() == 11)
+						if(card == 11)
 						{
 							card.setValue(1);
 							canLowerAce = true;
@@ -362,18 +246,17 @@ BlackJack::hittingPhase()
 				}
 				if(!canLowerAce)
 				{
-					printf("userturnindex = %d\n", userTurnIndex);
-					isLose[userTurnIndex] = true;
+					PLAYER->isLose[userTurnIndex] = true;
 					userTurnIndex += 1;
-					isDone = (userTurnIndex > (((BlackjackUser *)(users[0]))->hand[1].size() ? 1 : 0));
+					isDone = (userTurnIndex > (PLAYER->hand[1].size() ? 1 : 0));
 				}
 			}
 		}
 	}
-	else if(isStand)
+	else if(PLAYER->isStand)
 	{
-		isStand = false;
-		if((userTurnIndex == 0) && ((BlackjackUser *)(users[0]))->hand[1].size())
+		PLAYER->isStand = false;
+		if((userTurnIndex == 0) && PLAYER->hand[1].size())
 		{
 			userTurnIndex += 1;
 		}
@@ -388,16 +271,14 @@ BlackJack::hittingPhase()
 		dealer->revealCard();
 		isDone = false;
 		isReady = false;
-		if(!isLose[0] || !isLose[1])
+		if(!PLAYER->isLose[0] || !PLAYER->isLose[1])
 		{
-			int sum = dealer->hand[0][0].getValue() + dealer->hand[0][1].getValue();
-			while(sum < 14)
-			{			
-				dealer->dealCard((BlackjackUser *)(dealer), 0);
-				sum += dealer->hand[0][dealer->hand[0].size()-1].getValue();
+			while(dealer->hand[0] < 14)
+			{
+				dealer->dealCard((BlackjackUser *)dealer, 0);
 			}
 		}
-		((User *)(users[0]))->isReady = false;
+		USER->isReady = false;
 		state = State::SETTLEMENT;
 	}
 	else
@@ -413,87 +294,66 @@ BlackJack::settlementPhase()
 	{
 		dealer->revealCard();
 
-		int dealerSum = 0;
-		int userSum1 = 0;
-		int userSum2 = 0;
-
-		for(Card card : ((BlackjackUser *)(users[0]))->hand[0])
+		if((dealer->hand[0] == 21) && (dealer->hand[0].size() == 2) && (PLAYER->insuranceAmount > 0.00))
 		{
-			userSum1 += card.getValue();
-		}
-		if(((BlackjackUser *)(users[0]))->hand[1].size())
-		{
-			for(Card card : ((BlackjackUser *)(users[0]))->hand[1])
-			{
-				userSum2 += card.getValue();
-			}
+			USER->addBalance(PLAYER->insuranceAmount * 2);
+			PLAYER->isLose[0] = true;
+			PLAYER->isLose[1] = true;
 		}
 		
-		for(Card card : dealer->hand[0])
+		if(!PLAYER->isLose[0])
 		{
-			dealerSum += card.getValue();
-		}
-
-		if((dealerSum == 21) && (dealer->hand[0].size() == 2) && (insuranceAmount > 0.00))
-		{
-			((User *)(users[0]))->addBalance(insuranceAmount * 2);
-			isLose[0] = true;
-			isLose[1] = true;
-		}
-		
-		if(!isLose[0])
-		{
-			if(dealerSum == userSum1) // DRAW
+			if(dealer->hand[0] == PLAYER->hand[0]) // DRAW
 			{
-				isWon[0] = true;
-				isLose[0] = true;
-				((User *)(users[0]))->addBalance(bettingAmount[0] * (1 + isDoubleDown));
+				PLAYER->isWon[0] = true;
+				PLAYER->isLose[0] = true;
+				USER->addBalance(PLAYER->bettingAmount[0] * (1 + PLAYER->isDoubleDown));
 			}
-			else if(isNatural)		// NATURAL
+			else if(PLAYER->isNatural)		// NATURAL
 			{
-				isWon[0] = true;
-				((User *)(users[0]))->addBalance(bettingAmount[0] * 1.5);
+				PLAYER->isWon[0] = true;
+				USER->addBalance(PLAYER->bettingAmount[0] * 1.5);
 			}
-			else if((userSum1 > dealerSum) && (userSum1 <= 21)) // WIN
+			else if((PLAYER->hand[0] > dealer->hand[0]) && (PLAYER->hand[0] <= 21)) // WIN
 			{
-				isWon[0] = true;
-				((User *)(users[0]))->addBalance(bettingAmount[0] * (userSum1 == 21 ? 3 : 2));
+				PLAYER->isWon[0] = true;
+				USER->addBalance(PLAYER->bettingAmount[0] * (PLAYER->hand[0] == 21 ? 3 : 2));
 			}
-			else if(dealerSum > 21)
+			else if(dealer->hand[0] > 21)
 			{
-				isWon[0] = true;
-				((User *)(users[0]))->addBalance(bettingAmount[0] * (userSum1 == 21 ? 3 : 2));
+				PLAYER->isWon[0] = true;
+				USER->addBalance(PLAYER->bettingAmount[0] * (PLAYER->hand[0] == 21 ? 3 : 2));
 			}
 			else
 			{
-				isLose[0] = true;
+				PLAYER->isLose[0] = true;
 			}
 		}
-		if(!isLose[1] && userSum2)
+		if(!PLAYER->isLose[1] && PLAYER->hand[1].sum())
 		{
-			if(dealerSum == userSum2) // DRAW
+			if(dealer->hand[0] == PLAYER->hand[1]) // DRAW
 			{
-				isWon[1] = true;
-				isLose[1] = true;
-				((User *)(users[0]))->addBalance(bettingAmount[1] / (1 + isDoubleDown));
+				PLAYER->isWon[1] = true;
+				PLAYER->isLose[1] = true;
+				USER->addBalance(PLAYER->bettingAmount[1] / (1 + PLAYER->isDoubleDown));
 			}
-			else if((userSum2 > dealerSum) && (userSum2 <= 21))	// WIN
+			else if((PLAYER->hand[1] > dealer->hand[0]) && (PLAYER->hand[1] <= 21))	// WIN
 			{
-				isWon[1] = true;
-				((User *)(users[0]))->addBalance(bettingAmount[1] * (userSum1 == 21 ? 3 : 2));
+				PLAYER->isWon[1] = true;
+				USER->addBalance(PLAYER->bettingAmount[1] * (PLAYER->hand[0] == 21 ? 3 : 2));
 			}
-			else if(dealerSum > 21)
+			else if(dealer->hand[0] > 21)
 			{
-				isWon[1] = true;
-				((User *)(users[0]))->addBalance(bettingAmount[0] * (userSum1 == 21 ? 3 : 2));
+				PLAYER->isWon[1] = true;
+				USER->addBalance(PLAYER->bettingAmount[0] * (PLAYER->hand[0] == 21 ? 3 : 2));
 			}
 			else
 			{
-				isLose[1] = true;
+				PLAYER->isLose[1] = true;
 			}
 		}
 		isReady = true;
-		((User *)(users[0]))->isReady = true;
+		USER->isReady = true;
 	}
 	if(isDone)
 	{
@@ -582,11 +442,11 @@ BlackJack::input(Param param)
 				throw "BETTING_AMOUNT_INVALID";
 			if(atof(param.values[1]) > maxBettingAmount)
 				throw "BETTING_AMOUNT_TOO_MUCH";
-			if(atof(param.values[1]) > ((BlackjackUser *)(users[0]))->getBalance())
+			if(atof(param.values[1]) > PLAYER->getBalance())
 				throw "NOT_ENOUGH_BALANCE";
 			
 			time_t timeOut = time(NULL) + 5; // 5 second timeout time
-			while(!((User *)(users[0]))->isReady)
+			while(!USER->isReady)
 			{
 				if(time(NULL) >= timeOut)
 				{
@@ -594,11 +454,11 @@ BlackJack::input(Param param)
 				}
 				SLEEP(0.1);
 			}
-			if(!((User *)(users[0]))->isReady)
+			if(!USER->isReady)
 				throw "USER_NOT_READY";
 
-			((BlackjackUser *)(users[0]))->isReady = false;
-			bettingAmount[0] = atof(param.values[1]);
+			PLAYER->isReady = false;
+			PLAYER->bettingAmount[0] = atof(param.values[1]);
 			isReady = false;
 			return "OK";
 		}
@@ -610,11 +470,11 @@ BlackJack::input(Param param)
 				throw "COULD_NOT_PLACE_INSURANCE";
 			if(atof(param.values[1]) <= 0)
 				throw "INSURANCE_AMOUNT_INVALID";
-			if(atof(param.values[1]) > (bettingAmount[0] / 2))
+			if(atof(param.values[1]) > (PLAYER->bettingAmount[0] / 2))
 				throw "INSURANCE_AMOUNT_TOO_BIG";
 
 			time_t timeOut = time(NULL) + 5; // 5 second timeout time
-			while(!((User *)(users[0]))->isReady)
+			while(!USER->isReady)
 			{
 				if(time(NULL) >= timeOut)
 				{
@@ -622,11 +482,11 @@ BlackJack::input(Param param)
 				}
 				SLEEP(0.1);
 			}
-			if(!((User *)(users[0]))->isReady)
+			if(!USER->isReady)
 				throw "USER_NOT_READY";
 
-			((BlackjackUser *)(users[0]))->isReady = false;
-			insuranceAmount = atof(param.values[1]);
+			PLAYER->isReady = false;
+			PLAYER->insuranceAmount = atof(param.values[1]);
 			isReady = false;
 			return "OK";
 		}
@@ -636,9 +496,9 @@ BlackJack::input(Param param)
 				throw "NOT_ENOUGH_PARAMS";
 			if(!running || state != State::SPLITTING)
 				throw "COULD_NOT_SPLIT_HAND";
-			if(((BlackjackUser *)(users[0]))->getBalance() < bettingAmount[0])
+			if(PLAYER->getBalance() < PLAYER->bettingAmount[0])
 				throw "NOT_ENOUGH_BALANCE_FOR_SPLIT";
-			isSplit = true;
+			PLAYER->isSplit = true;
 			isReady = false;
 			return "OK";
 		}
@@ -646,11 +506,11 @@ BlackJack::input(Param param)
 		{
 			if(!running || state != State::HITTING)
 				throw "COULD_NOT_HIT_CARD";
-			if(isLose[0] && isLose[1])
+			if(PLAYER->isLose[0] && PLAYER->isLose[1])
 				throw "CANNOT_HIT_WHEN_LOSE";
-			if(isHit)
+			if(PLAYER->isHit)
 				throw "ALREADY_HIT";
-			isHit = true;
+			PLAYER->isHit = true;
 			isReady = false;
 			return "HIT";
 		}
@@ -658,9 +518,9 @@ BlackJack::input(Param param)
 		{
 			if(!running || state != State::HITTING)
 				throw "COULD_NOT_STAND";
-			if(isStand)
+			if(PLAYER->isStand)
 				throw "ALREADY_STANDING";
-			isStand = true;
+			PLAYER->isStand = true;
 			isReady = false;
 			return "STAND";
 		}
@@ -680,7 +540,7 @@ BlackJack::input(Param param)
 				throw "GAME_NOT_RUNNING";
 			if(state != State::HITTING)
 				throw "COULD_NOT_SURRENDER";
-			isSurrender = true;
+			PLAYER->isSurrender = true;
 			isReady = false;
 			return "SURRENDER";
 		}
@@ -690,11 +550,11 @@ BlackJack::input(Param param)
 				throw "GAME_NOT_RUNNING";
 			if(state != State::HITTING)
 				throw "COULD_NOT_DOUBLE_DOWN";
-			if(isDoubleDown)
+			if(PLAYER->isDoubleDown)
 				throw "ALREAD_DOUBLE_DOWN";
-			if(((BlackjackUser *)(users[0]))->getBalance() < bettingAmount[0])
+			if(PLAYER->getBalance() < PLAYER->bettingAmount[0])
 				throw "NOT_ENOUGH_BALANCE_FOR_DOUBLE_DOWN";
-			isDoubleDown = true;
+			PLAYER->isDoubleDown = true;
 			isReady = false;
 			return "DOUBLE_DOWN";
 		}
@@ -732,7 +592,7 @@ BlackJack::input(Param param)
 			{
 				throw "-1";
 			}
-			return std::to_string(getSettlement());
+			return std::to_string(PLAYER->getSettlement());
 		}
 		if(strcmp(param.keys[0], "getbettingamount") == 0)
 		{
@@ -749,7 +609,7 @@ BlackJack::input(Param param)
 			{
 				throw "-1";
 			}
-			return (std::to_string(bettingAmount[0]));
+			return (std::to_string(PLAYER->bettingAmount[0]));
 		}
 		if(strcmp(param.keys[0], "getinsuranceamount") == 0)
 		{
@@ -766,7 +626,7 @@ BlackJack::input(Param param)
 			{
 				throw "-1";
 			}
-			return (std::to_string(insuranceAmount));
+			return (std::to_string(PLAYER->insuranceAmount));
 		}
 		if(strcmp(param.keys[0], "getphase") == 0)
 		{
@@ -819,14 +679,15 @@ void
 BlackJack::stop()
 {
 	printf("stop() . . .\n");
+
 	running = false;
+
 	cardDecks.clear();
-	((BlackjackUser *)(users[0]))->resetHand();
+
+	PLAYER->resetHand();
 	dealer->resetHand();
 
-	users.clear();
-	bets.clear();
-	
+	users.clear();	
 	delete dealer;
 
 	currentUsers = 0;

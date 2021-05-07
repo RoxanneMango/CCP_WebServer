@@ -8,6 +8,7 @@
 #include <ctype.h>
 
 #include <vector>
+#include <string>
 
 class Param
 {
@@ -19,6 +20,7 @@ private:
 	bool is_letter(char character);
 	bool is_number(char character);
 	int getParamSize(char * receiveBuffer);
+	int getHeaderSize(char * receiveBuffer);
 	
 public:
 	Param(unsigned int paramSize);
@@ -26,9 +28,15 @@ public:
 
 	std::vector<char *> keys;
 	std::vector<char *> values;
-
+	
+	std::vector<std::string> keyz;
+	std::vector<std::string> valuez;
+	
 	void print();
+	void printHeader();
+	
 	int getKeyAndValue(char * receiveBuffer);
+	int getHeader(char * receiveBuffer);
 };
 
 #endif // PARAM_H

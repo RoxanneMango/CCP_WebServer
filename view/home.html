@@ -28,8 +28,8 @@
 					<div id="errorResponseAddBalance"></div>
 				</form>
 			</div>
-			<a href="test.html"><input id="test" class="button" type="submit" name="test_button" value="test"\></a>
 			<br>
+			<a href="test.html"><input id="test" class="button" type="submit" name="test_button" value="test"\></a>
 		</div>
 		<hr class="divider">
 		<form method="post" id="logout" action="/logout">
@@ -41,6 +41,20 @@
 	<script type="text/javascript" src="logout.js"></script>
 	<script type="text/javascript" src="get_name.js"></script>
 	<script type="text/javascript" src="user.js"></script>
+	<script>
+	window.addEventListener('load', () => auth());
+	async function auth() {
+		let response =
+		await fetch( '/home', {
+	//		method: 'GET',
+			headers: new Headers({
+				'Authorization': sessionStorage.getItem('token')
+			})
+		})
+		.then( response => response.text() )
+		.catch( error => console.log(error) );
+	}
+	</script>
 	<script type="text/javascript" src="test.js"></script>
 </body>
 </html>

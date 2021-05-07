@@ -46,11 +46,9 @@ public:
 	
 	void print();
 	
-	bool operator == (Card & card)
-	{
-		return (this->value == card.getValue());
-	}
-	
+	bool operator == (Card & card)  { return (this->value == card.getValue()); }
+	bool operator == (int value)    { return (this->value == value);           }
+	bool operator == (char picture) { return (getPicture() == picture);        }
 };
 
 #endif // CARD_H
