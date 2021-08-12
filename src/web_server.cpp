@@ -16,37 +16,55 @@ WebServer::WebServer( Socket & serverSocket, Socket & clientSocket, const char *
 	
 	RouteFactory::load(routes, "src/routes.json");
 	
-	try
-	{
-		if(saveThread.joinable())
-		{
-			saveThread.detach();
-		}
+//	try
+//	{
+//		if(saveThread.joinable())
+//		{
+//			saveThread.detach();
+//		}
 		saveThread = std::thread(&WebServer::saveTimer, this);
-	}
-	catch(std::exception const & exception)
-	{
-		printf("Exception: %s\n", exception.what());
-		return;
-	}
+//	}
+//	catch(std::exception const & exception)
+//	{
+//		printf("Exception: %s\n", exception.what());
+//		return;
+//	}
 	
 }
 
 WebServer::~WebServer()
 {
+	isRunning = false;
+	
 	// free all allocated memory for header
 	free(header);
 	free(RESPONSE);
-	for(unsigned int i = 0; i < params.size(); ++i)
+	for(Param *& param : params)
 	{
-		delete params[i];
+		delete param;
 	}
 	params.clear();
-	for(unsigned int i = 0; i < headers.size(); ++i)
+	for(Param *& header : headers)
 	{
-		delete headers[i];
+		delete header;
 	}
 	headers.clear();
+	games.clear();
+	for(User *& user : users)
+	{
+		delete user;
+	}
+	users.clear();
+	for(Route *& route : routes)
+	{
+		delete route;
+	}
+	routes.clear();
+	
+	// join loose threads
+	saveThread.join();
+	
+	exit(0);
 }
 
 void
@@ -66,11 +84,18 @@ WebServer::save()
 void
 WebServer::saveTimer()
 {
-	for(;;)
+	unsigned int saveCooldown = 59;
+	unsigned int s = 0;
+	while(isRunning)
 	{
-		printf("save\n");
-		save();
-		SLEEP(60);
+		if(s <= 0)
+		{
+			printf("save\n");
+			save();
+			s = saveCooldown;
+		}
+		SLEEP(1);
+		s -= 1;
 	}
 }
 
@@ -248,7 +273,8 @@ WebServer::getPage()
 				}
 				else
 				{
-					strcpy(RESPONSE, FORBIDDEN_RESPONSE);
+				//	strcpy(RESPONSE, FORBIDDEN_RESPONSE);
+					strcpy(RESPONSE, UNAUTHORIZED_RESPONSE);
 				}
 			}
 		}
@@ -603,22 +629,42 @@ void
 WebServer::reload()
 {
 	RouteFactory::load(routes, "src/routes.json");
-//	for(unsigned int i = 0; i < routes.size(); ++i)
-//	{
-//		printf("%s : %s : %d;\n", routes[i]->url.c_str(), routes[i]->PATH.c_str(), routes[i]->isPublic);
-//	}
+	for(unsigned int i = 0; i < routes.size(); ++i)
+	{
+		printf("%s : %s : %d;\n", routes[i]->url.c_str(), routes[i]->PATH.c_str(), routes[i]->isPublic);
+	}
 	printf("> Reload complete\n");
+}
+
+void
+WebServer::quit()
+{
+	printf("> Shutting down\n");
+	this->WebServer::~WebServer();
 }
 
 bool
 WebServer::authenticate()
 {
-	for(unsigned int i = 0; i < users.size(); ++i)
-	{
-		if(users[i]->getIp() == clientSocket.getIpAddress())
-		{
-			return true;
-		}
-	}
+	// find authorization header
+//	for(unsigned int i = 0; i < params.size(); ++i)
+//	{
+//		if(!strcmp("authorization",params[i]->key.c_str()))
+//		{
+			for(unsigned int j = 0; j < users.size(); ++j)
+			{
+				// find logged in user with ip that send the packet
+				if(users[j]->getIp() == clientSocket.getIpAddress())
+				{
+					// check if tokens match
+//					if(users[j]->getToken() == params[i]->value)
+//					{
+//						printf("value: %s\n", params[i]->value.c_str());
+						return true;
+//					}
+				}
+			}			
+//		}
+//	}
 	return false;
 }

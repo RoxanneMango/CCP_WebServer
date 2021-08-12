@@ -146,7 +146,7 @@ private:
 
 public:
 	BlackJack(int id, unsigned int numOfDecks);
-	~BlackJack();
+	virtual ~BlackJack();
 	
 	std::string input(std::vector<Param *> & params);
 	

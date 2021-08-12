@@ -201,14 +201,5 @@ Param::getHeader(char * receiveBuffer, std::vector<Param *> & params)
 			}
 		}
 	}
-	
-	for(unsigned int i = 0; i < params.size(); ++i)
-	{
-		if(!strcmp("authorization",params[i]->key.c_str()))
-		{
-			printf("value: %s\n", params[i]->value.c_str());
-		}
-	}
-	
 	return 0;
 }

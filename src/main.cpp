@@ -7,6 +7,8 @@
 
 //http://www.hoeoudbenikookalweer.nl:44900
 
+// https://www.w3schools.com/js/js_cookies.asp
+
 int
 main(int argc, char ** argv)
 {

@@ -6,6 +6,7 @@
 
 #include "user.h"
 #include "param.h"
+#include "route.h"
 
 // Interface class
 class Game
@@ -21,6 +22,8 @@ public:
 	std::vector<void *> users;
 
 	Game(int id) : id(id)
+	{}
+	virtual ~Game()
 	{}
 
 	virtual User * addUser(User * user)

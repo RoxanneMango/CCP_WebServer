@@ -29,6 +29,8 @@ public:
 	Server(Socket & serverSocket, Socket & clientSocket);
 	~Server();
 
+	bool isRunning;
+
 	void setBufferSize(unsigned int bufferSize);
 
 	void addDatabase(Database * database);

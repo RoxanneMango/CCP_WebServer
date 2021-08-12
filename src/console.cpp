@@ -60,6 +60,10 @@ Console::process()
 	{
 		webServer.save();
 	}
+	else if(!strcmp(command, "quit") || !strcmp(command, "exit") || !strcmp(command, "shutdown"))
+	{
+		webServer.quit();
+	}
 	else if(!strcmp(command, "help"))
 	{
 		printf("> I am sorry but you are on your own\n");

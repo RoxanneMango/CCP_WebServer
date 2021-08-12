@@ -19,6 +19,7 @@ class WebServer : public Server
 	const char * OK_RESPONSE = "HTTP/1.0 200 OK\r\n";
 	const char * FORBIDDEN_RESPONSE = "HTTP/1.0 403 forbidden\r\n";
 	const char * NOT_FOUND_RESPONSE = "HTTP/1.0 404 not found\r\n";
+	const char * UNAUTHORIZED_RESPONSE = "HTTP/1.0 401 unauthorized";
 	const char * TP_RESPONSE = "HTTP/1.0 418 I'm a teapot\r\n";
 
 	const char * PREFIX = "view/";
@@ -86,6 +87,7 @@ public:
 	
 	void save();
 	void reload();
+	void quit();
 	
 	bool authenticate();
 	

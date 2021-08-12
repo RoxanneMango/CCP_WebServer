@@ -2,7 +2,8 @@
 
 Server::Server(	Socket & serverSocket, Socket & clientSocket ) :
 	serverSocket(serverSocket),
-	clientSocket(clientSocket)
+	clientSocket(clientSocket),
+	isRunning(true)
 {	
 	// default bufferSize
 	this->bufferSize = 10240;
