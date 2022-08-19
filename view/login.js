@@ -29,6 +29,7 @@ async function loginUser(event)
 			{
 				if(response.toString() == "OK") 
 				{
+					document.cookie = "token=" + token;
 					window.location.href = "home.html";
 				}
 				else

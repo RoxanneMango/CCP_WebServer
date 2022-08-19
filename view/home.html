@@ -44,11 +44,15 @@
 	<script>
 	window.addEventListener('load', () => auth());
 	async function auth() {
+
+		let cookie = decodeURIComponent(document.cookie).split("=");
+		let token = cookie[1];
+
 		let response =
 		await fetch( '/home', {
 	//		method: 'GET',
 			headers: new Headers({
-				'Authorization': sessionStorage.getItem('token')
+				'Authorization': token
 			})
 		})
 		.then( response => response.text() )
@@ -56,5 +60,6 @@
 	}
 	</script>
 	<script type="text/javascript" src="test.js"></script>
+
 </body>
 </html>

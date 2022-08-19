@@ -1,9 +1,15 @@
 window.addEventListener('load', () => auth());
 
+// kb14jen8n2ekb14jen8n2e
+
 async function auth()
 {
 	let url = "/loggedIn";
-	let token = sessionStorage.getItem('token');
+//	let token = sessionStorage.getItem('token');
+	let cookie = decodeURIComponent(document.cookie).split("=");
+	let token = cookie[1];
+	
+	console.log("token : " + token);
 	
 	if(token == null)
 	{

@@ -13,7 +13,11 @@ async function userInit()
 		}
 		else
 		{
-			userBalanceD.innerHTML = "<h4>balance : " + parseFloat(await fetch("/getBalance",{method: 'POST',body: JSON.stringify({"token" : sessionStorage.getItem('token')})}).then(response => response.text()).catch(error => console.log(error))).toFixed(2) + "</h4>";
+			
+			let cookie = decodeURIComponent(document.cookie).split("=");
+			let token = cookie[1];
+			
+			userBalanceD.innerHTML = "<h4>balance : " + parseFloat(await fetch("/getBalance",{method: 'POST',body: JSON.stringify({"token" : token})}).then(response => response.text()).catch(error => console.log(error))).toFixed(2) + "</h4>";
 			addBalanceD.style.display = "block";
 		}
 	}, false);
@@ -29,8 +33,12 @@ async function addBalance(event)
 	document.getElementById("errorResponseAddBalance").innerHTML = "";
 	let formData = new URLSearchParams(new FormData(document.getElementById("addBalanceForm")));
 	let url = "/addBalance";
+	
+	let cookie = decodeURIComponent(document.cookie).split("=");
+	let token = cookie[1];
+	
 	let data = {
-		"addBalance": sessionStorage.getItem('token'),
+		"addBalance": token,
 		"amount": formData.get("balanceAmount").toString()
 	}
 	let isOK = false;
@@ -40,8 +48,11 @@ async function addBalance(event)
 		{
 			if(response.toString() == "OK")
 			{
+				let cookie = decodeURIComponent(document.cookie).split("=");
+				let token = cookie[1];
+				
 				console.log("BALANCE_ADDED");
-				document.getElementById("userBalance").innerHTML = "<h4>balance : " + parseFloat(await fetch("/getBalance",{method: 'POST',body: JSON.stringify({"token" : sessionStorage.getItem('token')})}).then(response => response.text()).catch(error => console.log(error))).toFixed(2) + "</h4>";
+				document.getElementById("userBalance").innerHTML = "<h4>balance : " + parseFloat(await fetch("/getBalance",{method: 'POST',body: JSON.stringify({"token" : token})}).then(response => response.text()).catch(error => console.log(error))).toFixed(2) + "</h4>";
 				document.getElementById("addBalanceForm").reset();
 				isOK = true;
 			}

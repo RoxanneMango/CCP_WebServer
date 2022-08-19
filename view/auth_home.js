@@ -3,9 +3,13 @@ window.addEventListener('load', () => auth());
 async function auth()
 {
 	let url = "/loggedIn";
+
+	let cookie = decodeURIComponent(document.cookie).split("=");
+	let token = cookie[1];
+
 	let data =
 	{
-		"loggedIn": sessionStorage.getItem('token')
+		"loggedIn": token
 	}
 	
 	let num = 0;

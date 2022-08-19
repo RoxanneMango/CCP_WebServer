@@ -273,7 +273,7 @@ WebServer::getPage()
 				}
 				else
 				{
-				//	strcpy(RESPONSE, FORBIDDEN_RESPONSE);
+//					buffer.assign(fileIO.getFileContent(fileIO.defaultFile));
 					strcpy(RESPONSE, UNAUTHORIZED_RESPONSE);
 				}
 			}

@@ -7,10 +7,10 @@
 
 class FileIO
 {
-private:
+public:
 	const char * viewDir;
 	char * defaultFile;
-public:
+
 	FileIO(const char * viewDir, const char * defaultFile);
 	~FileIO();
 	

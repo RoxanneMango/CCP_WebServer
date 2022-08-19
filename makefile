@@ -47,7 +47,7 @@ database: $(OBJECTS)
 ifeq ($(OS),Windows_NT)
 
 server:
-	$(BUILD)\(OUT)\$(EXEC)
+	$(BUILD)\$(OUT)\$(EXEC)
 db:
 	$(BUILD)\$(OUT)\$(DB_EXEC)
 

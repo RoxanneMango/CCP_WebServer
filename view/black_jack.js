@@ -3,8 +3,9 @@ var insurancePlaced = false;
 
 window.addEventListener('load', () => init());
 async function init()
-{
-	let token = sessionStorage.getItem('token');
+{	
+	let cookie = decodeURIComponent(document.cookie).split("=");
+	let token = cookie[1];
 	
 	let startD = document.getElementById("blackjackStart");
 	let betD = document.getElementById("blackjackBet");
@@ -212,8 +213,12 @@ async function betAmount(event)
 	document.getElementById("errorResponseBlackjack").innerHTML = "";
 	let formData = new URLSearchParams(new FormData(document.getElementById("blackjackBetForm")));
 	let url = "/blackjack";
+
+	let cookie = decodeURIComponent(document.cookie).split("=");
+	let token = cookie[1];
+
 	let data = {
-		"bet": sessionStorage.getItem('token'),
+		"bet": token,
 		"amount": formData.get("betAmount").toString()
 	}
 	let isOK = false;
@@ -247,8 +252,12 @@ async function insureAmount(event)
 	document.getElementById("errorResponseBlackjack").innerHTML = "";	
 	let formData = new URLSearchParams(new FormData(document.getElementById("blackjackInsureForm")));
 	let url = "/blackjack";
+
+	let cookie = decodeURIComponent(document.cookie).split("=");
+	let token = cookie[1];
+
 	let data = {
-		"insure": sessionStorage.getItem('token'),
+		"insure": token,
 		"amount": formData.get("insureAmount").toString()
 	}
 	
@@ -276,14 +285,18 @@ async function insureAmount(event)
 async function getHands()
 {
 	let url = "/blackjack";
+
+	let cookie = decodeURIComponent(document.cookie).split("=");
+	let token = cookie[1];
+
 	let data = {
-		"gethands": sessionStorage.getItem('token')
+		"gethands": token
 	}
 	const string = await fetch(url, {method: 'POST', body: JSON.stringify(data)})
 	.then(response => response.text())
 	.catch(error => console.log(error));
 	
-	let turn = await fetch(url, {method: 'POST', body: JSON.stringify({"getturn":sessionStorage.getItem('token')})})
+	let turn = await fetch(url, {method: 'POST', body: JSON.stringify({"getturn":token})})
 	.then(response => response.text())
 	.catch(error => console.log(error));
 	
@@ -373,8 +386,12 @@ async function getPhase()
 {
 	let phase = -1;
 	let url = "/blackjack";
+	
+	let cookie = decodeURIComponent(document.cookie).split("=");
+	let token = cookie[1];
+	
 	let data = {
-		"getPhase": sessionStorage.getItem('token')
+		"getPhase": token
 	}
 	const phaseResponse = await fetch(url, {method: 'POST', body: JSON.stringify(data)})
 	.then(response => response.text())
@@ -392,8 +409,12 @@ async function getSettlement()
 {
 	let x = -1;
 	let url = "/blackjack";
+	
+	let cookie = decodeURIComponent(document.cookie).split("=");
+	let token = cookie[1];
+	
 	let data = {
-		"getsettlement": sessionStorage.getItem('token')
+		"getsettlement": token
 	}
 	const phaseResponse = await fetch(url, {method: 'POST', body: JSON.stringify(data)})
 	.then(response => response.text())
@@ -403,7 +424,7 @@ async function getSettlement()
 			if(x >= 0)
 			{
 				await processResults(x);
-				await post({"stop":sessionStorage.getItem('token')});
+				await post({"stop":token});
 			}
 		}
 	).catch(error => console.log(error));

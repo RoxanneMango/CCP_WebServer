@@ -49,8 +49,11 @@ void
 Console::process()
 {
 	// trim newline
-	char command[strlen(buffer)-1] = { 0 };
-	strncpy(command, buffer, strlen(buffer)-1);
+	
+	int len = strlen(buffer);
+	
+	char command[len] = { 0 };
+	strncpy(command, buffer, len-1);
 
 	if(!strcmp(command, "reload"))
 	{

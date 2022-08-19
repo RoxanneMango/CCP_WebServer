@@ -11,7 +11,6 @@ Server::Server(	Socket & serverSocket, Socket & clientSocket ) :
 	// allocate memory for all the buffers with size bufferSize
 	this->receiveBuffer = (char *) calloc(bufferSize, sizeof(char));
 	this->tranceiveBuffer = (char *) calloc(bufferSize, sizeof(char));
-//	this->buffer = (char *) calloc(bufferSize, sizeof(char));
 
 	selectedDatabase = 0;
 }
@@ -21,7 +20,6 @@ Server::~Server()
 	// free all allocated memory for buffers
 	free(receiveBuffer);
 	free(tranceiveBuffer);
-//	free(buffer);
 }
 
 void
@@ -36,7 +34,6 @@ Server::resizeBuffers()
 {
 	this->receiveBuffer = (char *) realloc(receiveBuffer, bufferSize * sizeof(char));
 	this->tranceiveBuffer = (char *) realloc(tranceiveBuffer, bufferSize * sizeof(char));
-//	this->buffer = (char *) realloc(buffer, bufferSize * sizeof(char));
 }
 
 void

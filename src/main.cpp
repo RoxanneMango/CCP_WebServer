@@ -12,7 +12,7 @@
 int
 main(int argc, char ** argv)
 {
-//	const char * ipAddress	= 	"192.168.1.9";
+//	const char * ipAddress	= 	"192.168.2.1";
 	const char * ipAddress	= 	"127.0.0.1";
 	unsigned short port		=	44900;
 	
@@ -58,7 +58,6 @@ main(int argc, char ** argv)
 			}
 			case WebServer::Type::Post:
 			{
-				//server.param.print();
 				server.getHeader();
 				server.processParam();
 				break;

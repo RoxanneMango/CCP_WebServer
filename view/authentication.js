@@ -22,9 +22,13 @@ async function registerUser(event, formData)
 async function loggedIn()
 {
 	let url = "/loggedIn";
+
+	let cookie = decodeURIComponent(document.cookie).split("=");
+	let token = cookie[1];
+
 	let data =
 	{
-		"loggedIn": sessionStorage.getItem('token')
+		"loggedIn": token
 	}
 	
 	let num = 0;
@@ -45,7 +49,7 @@ async function loginUser(event, formData)
 		let token = Math.random().toString(36).substr(2);
 		token += token;
 
-		sessionStorage.setItem('token', token);
+		document.cookie = "token=" + token;
 
 		let url = "/login";
 		let data = {
@@ -63,11 +67,14 @@ async function logoutUser(event)
 {
 	event.preventDefault();
 
+	let cookie = decodeURIComponent(document.cookie).split("=");
+	let token = cookie[1];
+
 	if((await loggedIn()) == 1)
 	{	
 		let url = "/logout";
 		let data = {
-			"logout": sessionStorage.getItem('token')
+			"logout": token
 		}
 		const response = await fetch(url, {method: 'POST', body: JSON.stringify(data)})
 		.then(response => response.text())
